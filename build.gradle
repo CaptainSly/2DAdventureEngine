@@ -5,14 +5,17 @@ plugins {
     id 'application'
 }
 
-sourceCompatibility = 1.15
-targetCompatibility = 1.15
+group 'captainsly'
+version '0.1.0'
+mainClassName = 'captainsly.Main'
 
 ext {
 	lwjglVersion = "3.3.0"
 	imguiVersion = "1.86.2"
 	jomlVersion = "1.10.4"
-	engineVersion = "0.1.0"
+	
+	reload4jVersion = "1.2.19"
+	slf4jVersion = "2.0.0-alpha6"
 }
 
 switch (OperatingSystem.current()) {
@@ -29,12 +32,17 @@ repositories {
 }
 
 dependencies {
+	
+	/* Logging - SLF4J & Reload4J */
+	implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+	implementation "ch.qos.reload4j:reload4j:${reload4jVersion}"
+	implementation "org.slf4j:slf4j-reload4j:${slf4jVersion}"
 
 	/* Dear ImGui */
     implementation "io.github.spair:imgui-java-binding:$imguiVersion"
     implementation "io.github.spair:imgui-java-lwjgl3:$imguiVersion"
     
-    implementation "io.github.spair:imgui-java-natives-windows:$imguiVersion"
+    implementation "io.github.spair:imgui-java-$lwjglNatives:$imguiVersion"
 	
 
 	/* LWJGL */
@@ -65,13 +73,15 @@ dependencies {
 }
 
 task fatJar(type: Jar) {
+	group = 'build'
+	description = 'Assembles a fat-jar executable jar'
 	
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	manifest {
-		attributes 'Main-Class' : "${engineVersion}"
+		attributes 'Main-Class': "${mainClassName}"
 	}
 	
-	archiveBaseName = "${rootProject.name}-${engineVersion}-all"
+	archiveBaseName = "${rootProject.name}"
 	from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
-	
 }
