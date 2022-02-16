@@ -4,11 +4,12 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 
 import org.joml.Vector3f;
 
+import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Scene;
 import captainsly.adventure.core.input.KeyListener;
-import captainsly.adventure.core.render.ShaderProgram;
 import captainsly.adventure.core.render.mesh.Mesh;
 import captainsly.adventure.core.render.mesh.Vertex;
+import captainsly.adventure.core.render.shaders.ShaderProgram;
 import captainsly.adventure.utils.Utils;
 
 public class TestScene implements Scene {
@@ -20,8 +21,8 @@ public class TestScene implements Scene {
 	public void onInitialization() {
 		Vertex[] data = new Vertex[] { new Vertex(new Vector3f(-1, -1, 0)), new Vertex(new Vector3f(0, 1, 0)),
 				new Vertex(new Vector3f(1, -1, 0)) };
-		mesh = new Mesh();
-		mesh.addVertices(data);
+
+		mesh = new Mesh(data);
 
 		try {
 			defaultShader = new ShaderProgram(
@@ -30,7 +31,6 @@ public class TestScene implements Scene {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Override
@@ -42,21 +42,20 @@ public class TestScene implements Scene {
 
 	@Override
 	public void onUpdate(double delta) {
-
 	}
 
 	@Override
 	public void onInput(double delta) {
 
 		if (KeyListener.isKeyDown(GLFW_KEY_A)) {
-			System.out.println("TEST DOWN");
+			Adventure.log.debug("TEST DOWN");
 		}
 
 	}
 
 	@Override
 	public void onDispose() {
-		defaultShader.onDispose();
+		mesh.onDispose();
 	}
 
 }

@@ -1,5 +1,8 @@
 package captainsly.adventure.utils;
 
+import static org.lwjgl.opengl.GL11.GL_VERSION;
+import static org.lwjgl.opengl.GL11.glGetString;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -16,7 +19,12 @@ public class Utils {
 	public static final String ENGINE_ASSET_DIRECTORY = "src/main/resources/";
 	public static final String ENGINE_WORKING_DIRECTORY = System.getProperty("user.dir") + "/adventure/";
 
+	public static String getOpenGLVersion() {
+		return glGetString(GL_VERSION);
+	}
+	
 	/* Buffer Utility Methods */
+
 	public static FloatBuffer createFloatBuffer(int size) {
 		return BufferUtils.createFloatBuffer(size);
 	}
@@ -32,6 +40,7 @@ public class Utils {
 
 		buffer.flip();
 		return buffer;
+
 	}
 
 	/* File Utiltiy Methods */

@@ -20,10 +20,11 @@ import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.impl.Scene;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.render.Window;
+import captainsly.adventure.utils.Utils;
 
 public class Engine implements Disposable {
 
-	public static final Logger log = LoggerFactory.getLogger(Engine.class);
+	private static final Logger log = LoggerFactory.getLogger(Engine.class);
 
 	private Window window;
 	private Scene currentScene;
@@ -31,13 +32,13 @@ public class Engine implements Disposable {
 	public Engine(Scene scene) {
 		Adventure.engine = this;
 		Adventure.rnJesus = new Random(System.currentTimeMillis());
-
+		Adventure.log = log;
 		currentScene = scene;
 		initalizeEngine();
 	}
 
 	private void initalizeEngine() {
-		log.info("LWJGL Version: " + Version.getVersion());
+		Adventure.log.info("LWJGL Version: " + Version.getVersion());
 
 		// Setup GLFW Error Callback
 		GLFWErrorCallback.createPrint(System.err).set();
@@ -50,6 +51,15 @@ public class Engine implements Disposable {
 		Adventure.window = window;
 
 		glfwSetKeyCallback(window.getWindowPointer(), KeyListener::keyCallback);
+
+		glfwSetFramebufferSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
+			this.window.setWindowWidth(windowWidth);
+			this.window.setWindowHeight(windowHeight);
+			this.window.setIsResized(true);
+
+			Adventure.log.debug("Width and Height of Window has been changed to " + windowWidth + " x " + windowHeight);
+
+		});
 
 		// Get the thread stack and push a new frame
 		try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -72,6 +82,8 @@ public class Engine implements Disposable {
 		glfwShowWindow(window.getWindowPointer());
 
 		GL.createCapabilities();
+		Adventure.log.info("OpenGL Version: " + Utils.getOpenGLVersion());
+		
 		currentScene.onInitialization();
 
 	}
@@ -85,7 +97,7 @@ public class Engine implements Disposable {
 		double lastTime = glfwGetTime();
 		double unprocessedTime = 0;
 
-		double frameTime = 1.0d / 60;
+		double frameTime = 1.0 / 60;
 
 		while (running) {
 			boolean render = false;
@@ -102,10 +114,10 @@ public class Engine implements Disposable {
 
 				unprocessedTime -= frameTime;
 
+				glfwPollEvents();
+
 				if (glfwWindowShouldClose(window.getWindowPointer()))
 					running = false;
-
-				glfwPollEvents();
 
 				if (KeyListener.isKeyDown(GLFW_KEY_ESCAPE))
 					glfwSetWindowShouldClose(window.getWindowPointer(), true);
@@ -114,7 +126,7 @@ public class Engine implements Disposable {
 				currentScene.onUpdate(frameTime);
 
 				if (frameCounter >= 1.0) {
-					window.setWindowTitle("Adventure " + frames);
+					window.setWindowTitle("Adventure fps:" + frames);
 					frames = 0;
 					frameCounter = 0;
 				}
@@ -122,10 +134,18 @@ public class Engine implements Disposable {
 			}
 
 			if (render) {
+
+				if (window.isResized()) {
+					glViewport(0, 0, window.getWindowWidth(), window.getWindowHeight());
+					window.setIsResized(false);
+					Adventure.log.debug("Resizing");
+				}
+
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+				glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
 
 				currentScene.onRender(frameTime);
+
 				glfwSwapBuffers(window.getWindowPointer());
 				frames++;
 			} else {
@@ -158,6 +178,7 @@ public class Engine implements Disposable {
 
 	@Override
 	public void onDispose() {
+		Adventure.log.debug("Disposing");
 		currentScene.onDispose();
 
 		// Free the window callbacks
