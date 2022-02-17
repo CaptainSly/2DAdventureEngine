@@ -123,6 +123,9 @@ cmake-build-*/
 # IntelliJ
 out/
 
+# hs_err_pid logs
+hs_err_pid*.log
+
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 

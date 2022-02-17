@@ -4,11 +4,14 @@ import static org.lwjgl.opengl.GL11.GL_VERSION;
 import static org.lwjgl.opengl.GL11.glGetString;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 
 import captainsly.adventure.core.render.mesh.Vertex;
@@ -16,19 +19,45 @@ import captainsly.adventure.core.render.mesh.Vertex;
 public class Utils {
 
 	/* String References */
-	public static final String ENGINE_ASSET_DIRECTORY = "src/main/resources/";
 	public static final String ENGINE_WORKING_DIRECTORY = System.getProperty("user.dir") + "/adventure/";
 
 	public static String getOpenGLVersion() {
 		return glGetString(GL_VERSION);
 	}
-	
+
 	/* Buffer Utility Methods */
 
 	public static FloatBuffer createFloatBuffer(int size) {
 		return BufferUtils.createFloatBuffer(size);
 	}
+	
+	public static IntBuffer createIndicesBuffer(int[] data) {
+		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
+		buffer.put(data).flip();
+		return buffer;
+	}
+	
+	public static FloatBuffer createMatrixBuffer(Matrix4f data) {
+		FloatBuffer buffer = createFloatBuffer(16);
+		data.get(buffer);
+		
+		return buffer;
+	}
 
+	public static FloatBuffer createFlippedColorBuffer(Vector3f[] data) {
+		FloatBuffer buffer = createFloatBuffer(data.length * 3);
+		
+		for (int i = 0; i < data.length; i++) {
+			buffer.put(data[i].x);
+			buffer.put(data[i].y);
+			buffer.put(data[i].z);
+		}
+		
+		buffer.flip();
+		return buffer;
+		
+	}
+	
 	public static FloatBuffer createFlippedVerticesBuffer(Vertex[] data) {
 		FloatBuffer buffer = createFloatBuffer(data.length * Vertex.SIZE);
 
@@ -55,26 +84,24 @@ public class Utils {
 	 * @return The File's contents as a string
 	 */
 	public static String loadFileContentsToString(String fileName) {
-		File file = new File(fileName);
 		StringBuilder sBuilder = new StringBuilder();
-		if (file.exists()) {
-			try {
-				BufferedReader fileReader = new BufferedReader(new FileReader(file));
+		try {
+			InputStream fileStream = Utils.class.getResourceAsStream("/" + fileName);
+			BufferedReader fileReader = new BufferedReader(new InputStreamReader(fileStream));
 
-				String line = fileReader.readLine();
+			String line = fileReader.readLine();
 
-				while (line != null) {
-					sBuilder.append(line + "\n");
-					line = fileReader.readLine();
-				}
-
-				fileReader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			while (line != null) {
+				sBuilder.append(line + "\n");
+				line = fileReader.readLine();
 			}
 
+			fileReader.close();
+			fileStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
+		
 		return sBuilder.toString();
 	}
 

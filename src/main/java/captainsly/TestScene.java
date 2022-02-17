@@ -19,15 +19,20 @@ public class TestScene implements Scene {
 
 	@Override
 	public void onInitialization() {
-		Vertex[] data = new Vertex[] { new Vertex(new Vector3f(-1, -1, 0)), new Vertex(new Vector3f(0, 1, 0)),
-				new Vertex(new Vector3f(1, -1, 0)) };
+		Vertex[] vertices = new Vertex[] { new Vertex(new Vector3f(-0.5f, 0.5f, 0.0f)),
+				new Vertex(new Vector3f(-0.5f, -0.5f, 0.0f)), new Vertex(new Vector3f(0.5f, -0.5f, 0.0f)),
+				new Vertex(new Vector3f(0.5f, 0.5f, 0.0f)) };
 
-		mesh = new Mesh(data);
+		int[] indices = new int[] { 0, 1, 3, 3, 1, 2 };
+
+		Vector3f[] color = new Vector3f[] { new Vector3f(0.5f, 0.0f, 0.0f), new Vector3f(0.0f, 0.5f, 0.0f),
+				new Vector3f(0.0f, 0.0f, 0.5f), new Vector3f(0.5f, 0.5f, 0.5f) };
+
+		mesh = new Mesh(vertices, indices, color);
 
 		try {
-			defaultShader = new ShaderProgram(
-					Utils.loadFileContentsToString(Utils.ENGINE_ASSET_DIRECTORY + "defaultShader.vs"),
-					Utils.loadFileContentsToString(Utils.ENGINE_ASSET_DIRECTORY + "defaultShader.fs"));
+			defaultShader = new ShaderProgram(Utils.loadFileContentsToString("defaultShader.vs"),
+					Utils.loadFileContentsToString("defaultShader.fs"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -35,6 +40,8 @@ public class TestScene implements Scene {
 
 	@Override
 	public void onRender(double delta) {
+		Adventure.engine.render(1, 1, 1);
+
 		defaultShader.bind();
 		mesh.draw();
 		defaultShader.unbind();

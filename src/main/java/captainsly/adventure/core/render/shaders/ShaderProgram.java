@@ -6,8 +6,14 @@ import static org.lwjgl.opengl.GL32.GL_GEOMETRY_SHADER;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Disposable;
+import captainsly.adventure.utils.Utils;
 
 public class ShaderProgram implements Disposable {
 
@@ -82,9 +88,53 @@ public class ShaderProgram implements Disposable {
 	}
 
 	// -- Uniform Methods --
-	public void addUniform(String uniformName) {
+	public void addUniform(String uniformName) throws Exception {
 		int uniformLocation = glGetUniformLocation(shaderProgramId, uniformName);
+
+		if (uniformLocation < 0)
+			throw new Exception("Could not find uniform location for uniform named: " + uniformName);
+
 		uniformMap.put(uniformName, uniformLocation);
+	}
+
+	public void setUniform(String uniformName, float value) {
+		glUniform1f(getUniform(uniformName), value);
+	}
+
+	public void setUniform(String uniformName, float value, float value2) {
+		glUniform2f(getUniform(uniformName), value, value2);
+	}
+
+	public void setUniform(String uniformName, float value, float value2, float value3) {
+		glUniform3f(getUniform(uniformName), value, value2, value3);
+	}
+
+	public void setUniform(String uniformName, float value, float value2, float value3, float value4) {
+		glUniform4f(getUniform(uniformName), value, value2, value3, value4);
+	}
+
+	public void setUniform(String uniformName, Vector2f value) {
+		glUniform2f(getUniform(uniformName), value.x, value.y);
+	}
+
+	public void setUniform(String uniformName, Vector3f value) {
+		glUniform3f(getUniform(uniformName), value.x, value.y, value.z);
+	}
+
+	public void setUniform(String uniformName, Vector4f value) {
+		glUniform4f(getUniform(uniformName), value.x, value.y, value.z, value.w);
+	}
+
+	public void setUniform(String uniformName, int value) {
+		glGetUniformi(getUniform(uniformName), value);
+	}
+
+	public void setUniform(String uniformName, boolean value) {
+		glGetUniformi(getUniform(uniformName), value ? 1 : 0);
+	}
+
+	public void setUniform(String uniformName, Matrix4f value) {
+		glUniformMatrix4fv(getUniform(uniformName), false, Utils.createMatrixBuffer(value));
 	}
 
 	public int getUniform(String uniformName) {

@@ -56,9 +56,6 @@ public class Engine implements Disposable {
 			this.window.setWindowWidth(windowWidth);
 			this.window.setWindowHeight(windowHeight);
 			this.window.setIsResized(true);
-
-			Adventure.log.debug("Width and Height of Window has been changed to " + windowWidth + " x " + windowHeight);
-
 		});
 
 		// Get the thread stack and push a new frame
@@ -83,7 +80,7 @@ public class Engine implements Disposable {
 
 		GL.createCapabilities();
 		Adventure.log.info("OpenGL Version: " + Utils.getOpenGLVersion());
-		
+
 		currentScene.onInitialization();
 
 	}
@@ -138,12 +135,8 @@ public class Engine implements Disposable {
 				if (window.isResized()) {
 					glViewport(0, 0, window.getWindowWidth(), window.getWindowHeight());
 					window.setIsResized(false);
-					Adventure.log.debug("Resizing");
 				}
-
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-
+				
 				currentScene.onRender(frameTime);
 
 				glfwSwapBuffers(window.getWindowPointer());
@@ -157,6 +150,11 @@ public class Engine implements Disposable {
 			}
 
 		}
+	}
+
+	public void render(float r, float g, float b) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(r, g, b, 1);
 	}
 
 	public void switchScene(Scene scene) {
@@ -178,7 +176,7 @@ public class Engine implements Disposable {
 
 	@Override
 	public void onDispose() {
-		Adventure.log.debug("Disposing");
+		Adventure.log.info("Disposing");
 		currentScene.onDispose();
 
 		// Free the window callbacks

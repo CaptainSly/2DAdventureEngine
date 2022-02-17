@@ -16,6 +16,10 @@ ext {
 	
 	reload4jVersion = "1.2.19"
 	slf4jVersion = "2.0.0-alpha6"
+	
+	gsonVersion = "2.9.0"
+	
+	jRubyVersion = "9.3.3.0"
 }
 
 switch (OperatingSystem.current()) {
@@ -41,16 +45,19 @@ dependencies {
 	/* Dear ImGui */
     implementation "io.github.spair:imgui-java-binding:$imguiVersion"
     implementation "io.github.spair:imgui-java-lwjgl3:$imguiVersion"
-    
     implementation "io.github.spair:imgui-java-$lwjglNatives:$imguiVersion"
-	
+
+	/* GSON */
+	implementation "com.google.code.gson:gson:$gsonVersion"
+
+	/* jRuby */
+	implementation "org.jruby:jruby:$jRubyVersion"
 
 	/* LWJGL */
 	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
 	implementation "org.lwjgl:lwjgl"
 	implementation "org.lwjgl:lwjgl-assimp"
-	implementation "org.lwjgl:lwjgl-bgfx"
 	implementation "org.lwjgl:lwjgl-glfw"
 	implementation "org.lwjgl:lwjgl-nanovg"
 	implementation "org.lwjgl:lwjgl-nuklear"
@@ -61,7 +68,6 @@ dependencies {
 	implementation "org.lwjgl:lwjgl-vulkan"
 	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-	runtimeOnly "org.lwjgl:lwjgl-bgfx::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-nanovg::$lwjglNatives"
 	runtimeOnly "org.lwjgl:lwjgl-nuklear::$lwjglNatives"
@@ -72,16 +78,34 @@ dependencies {
 	implementation "org.joml:joml:${jomlVersion}"
 }
 
+jar {
+    manifest {
+        attributes (
+            'Class-Path': configurations.runtimeClasspath.collect { it.getName() }.join(' '),
+            'Main-Class': 'captainsly.Main'
+        )
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 task fatJar(type: Jar) {
-	group = 'build'
-	description = 'Assembles a fat-jar executable jar'
+	group 'build'
+	description 'Creates a fat jar with all of the dependencies and natives included'
 	
+	manifest.from jar.manifest
+	classifier = 'all'
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	manifest {
-		attributes 'Main-Class': "${mainClassName}"
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	} {
+		exclude "META-INF/*.SF"
+		exclude "META-INF/*.DSA"
+		exclude "META-INF/*.RSA"
 	}
-	
-	archiveBaseName = "${rootProject.name}"
-	from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
+	with jar
 }
