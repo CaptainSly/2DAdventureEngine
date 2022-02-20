@@ -3,9 +3,11 @@ package captainsly.adventure.core;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
+import java.io.File;
 import java.nio.IntBuffer;
 import java.util.Random;
 
+import org.jruby.runtime.Constants;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -19,7 +21,9 @@ import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.impl.Scene;
 import captainsly.adventure.core.input.KeyListener;
+import captainsly.adventure.core.input.MouseListener;
 import captainsly.adventure.core.render.Window;
+import captainsly.adventure.core.scripting.AdventureScriptEngine;
 import captainsly.adventure.utils.Utils;
 
 public class Engine implements Disposable {
@@ -28,17 +32,38 @@ public class Engine implements Disposable {
 
 	private Window window;
 	private Scene currentScene;
+	private AdventureScriptEngine adventureScript;
 
 	public Engine(Scene scene) {
 		Adventure.engine = this;
 		Adventure.rnJesus = new Random(System.currentTimeMillis());
 		Adventure.log = log;
+		adventureScript = new AdventureScriptEngine();
+
+		Adventure.adventureScript = adventureScript;
 		currentScene = scene;
+
+		// Create the engine companion directory and it's sub directories if it does not
+		// exist.
+		/*
+		 * Companion Directory Layout adventure \_ scripts \_ mods
+		 */
+		if (!(new File(Utils.ENGINE_WORKING_DIRECTORY).exists())) {
+			Utils.createEngineFileStructure();
+
+			String[] paths = new String[] { "scripts", "mods" };
+
+			for (int i = 0; i < paths.length; i++) {
+				File compDir = new File(Utils.ENGINE_WORKING_DIRECTORY + paths[i]);
+				compDir.mkdirs();
+			}
+
+		}
+
 		initalizeEngine();
 	}
 
 	private void initalizeEngine() {
-		Adventure.log.info("LWJGL Version: " + Version.getVersion());
 
 		// Setup GLFW Error Callback
 		GLFWErrorCallback.createPrint(System.err).set();
@@ -51,6 +76,9 @@ public class Engine implements Disposable {
 		Adventure.window = window;
 
 		glfwSetKeyCallback(window.getWindowPointer(), KeyListener::keyCallback);
+		glfwSetMouseButtonCallback(window.getWindowPointer(), MouseListener::mouseButtonCallback);
+		glfwSetCursorPosCallback(window.getWindowPointer(), MouseListener::mousePosCallback);
+		glfwSetScrollCallback(window.getWindowPointer(), MouseListener::mouseScrollCallback);
 
 		glfwSetFramebufferSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
 			this.window.setWindowWidth(windowWidth);
@@ -79,7 +107,13 @@ public class Engine implements Disposable {
 		glfwShowWindow(window.getWindowPointer());
 
 		GL.createCapabilities();
+
+		// Log Version Information
+		Adventure.log.info("LWJGL Version: " + Version.getVersion());
 		Adventure.log.info("OpenGL Version: " + Utils.getOpenGLVersion());
+		Adventure.log.info("JRuby Version: " + Constants.VERSION + " | Ruby Version: " + Constants.RUBY_VERSION);
+		Adventure.log.info("2DAdventure Engine Version: " + Utils.ENGINE_VERSION);
+		Adventure.log.info("AdventureScript Engine Version: " + AdventureScriptEngine.SCRIPT_ENGINE_VERSION);
 
 		currentScene.onInitialization();
 
@@ -119,6 +153,8 @@ public class Engine implements Disposable {
 				if (KeyListener.isKeyDown(GLFW_KEY_ESCAPE))
 					glfwSetWindowShouldClose(window.getWindowPointer(), true);
 
+				MouseListener.update();
+
 				currentScene.onInput(frameTime);
 				currentScene.onUpdate(frameTime);
 
@@ -136,7 +172,7 @@ public class Engine implements Disposable {
 					glViewport(0, 0, window.getWindowWidth(), window.getWindowHeight());
 					window.setIsResized(false);
 				}
-				
+
 				currentScene.onRender(frameTime);
 
 				glfwSwapBuffers(window.getWindowPointer());

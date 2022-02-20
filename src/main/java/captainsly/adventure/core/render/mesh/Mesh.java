@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
+import org.joml.Vector2i;
 import org.joml.Vector3f;
 
 import captainsly.adventure.core.impl.Disposable;
@@ -19,10 +20,10 @@ import captainsly.adventure.utils.Utils;
 
 public class Mesh implements Disposable {
 
-	private int vaoId, pVboId, iVboId, cVboId;
+	private int vaoId, pVboId, iVboId, cVboId, tVboId;
 	private int vertexSize;
 
-	public Mesh(Vertex[] vertices, int[] indices, Vector3f[] colors) {
+	public Mesh(Vertex[] vertices, int[] indices, Vector3f[] colors, Vector2i[] uvCoords) {
 
 		vertexSize = indices.length;
 
@@ -42,12 +43,18 @@ public class Mesh implements Disposable {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iVboId);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Utils.createIndicesBuffer(indices), GL_STATIC_DRAW);
 
-		// Colors 
+		// Colors
 		cVboId = glGenBuffers();
 		glBindBuffer(GL_ARRAY_BUFFER, cVboId);
 		glBufferData(GL_ARRAY_BUFFER, Utils.createFlippedColorBuffer(colors), GL_STATIC_DRAW);
 		glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-		
+
+		// uvCoords
+		tVboId = glGenBuffers();
+		glBindBuffer(GL_ARRAY_BUFFER, tVboId);
+		glBufferData(GL_ARRAY_BUFFER, Utils.createFlippedUvCoordsBuffer(uvCoords), GL_STATIC_DRAW);
+		glVertexAttribPointer(2, 2, GL_INT, false, 0, 0);
+
 		glBindVertexArray(0);
 	}
 
@@ -55,9 +62,13 @@ public class Mesh implements Disposable {
 		glBindVertexArray(vaoId);
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
+		glEnableVertexAttribArray(2);
+
 		glDrawElements(GL_TRIANGLES, vertexSize, GL_UNSIGNED_INT, 0);
+
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
 		glBindVertexArray(0);
 	}
 
@@ -65,10 +76,13 @@ public class Mesh implements Disposable {
 	public void onDispose() {
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glDeleteBuffers(pVboId);
 		glDeleteBuffers(iVboId);
+		glDeleteBuffers(cVboId);
+		glDeleteBuffers(tVboId);
 
 		glBindVertexArray(0);
 		glDeleteVertexArrays(vaoId);
