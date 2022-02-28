@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Disposable;
-import captainsly.adventure.core.impl.Scene;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
 import captainsly.adventure.core.render.Window;
@@ -34,15 +33,18 @@ public class Engine implements Disposable {
 	private Scene currentScene;
 	private AdventureScriptEngine adventureScript;
 
+	private boolean isRunning;
+
 	public Engine(Scene scene) {
 		Adventure.engine = this;
 		Adventure.rnJesus = new Random(System.currentTimeMillis());
 		Adventure.log = log;
+
 		adventureScript = new AdventureScriptEngine();
-
 		Adventure.adventureScript = adventureScript;
-		currentScene = scene;
 
+		currentScene = scene;
+		Adventure.currentScene = currentScene;
 		// Create the engine companion directory and it's sub directories if it does not
 		// exist.
 		/*
@@ -64,7 +66,7 @@ public class Engine implements Disposable {
 	}
 
 	private void initalizeEngine() {
-
+		Adventure.log.info("Starting Engine Initialization");
 		// Setup GLFW Error Callback
 		GLFWErrorCallback.createPrint(System.err).set();
 
@@ -72,9 +74,11 @@ public class Engine implements Disposable {
 		if (!glfwInit())
 			throw new IllegalStateException("Unable to initialize GLFW");
 
+		Adventure.log.info("Creating Window");
 		window = new Window("Adventure", 1280, 720);
 		Adventure.window = window;
 
+		Adventure.log.info("Setting callbacks");
 		glfwSetKeyCallback(window.getWindowPointer(), KeyListener::keyCallback);
 		glfwSetMouseButtonCallback(window.getWindowPointer(), MouseListener::mouseButtonCallback);
 		glfwSetCursorPosCallback(window.getWindowPointer(), MouseListener::mousePosCallback);
@@ -106,6 +110,7 @@ public class Engine implements Disposable {
 		glfwSwapInterval(1);
 		glfwShowWindow(window.getWindowPointer());
 
+		Adventure.log.info("Creating GL Capabilities");
 		GL.createCapabilities();
 
 		// Log Version Information
@@ -115,12 +120,11 @@ public class Engine implements Disposable {
 		Adventure.log.info("2DAdventure Engine Version: " + Utils.ENGINE_VERSION);
 		Adventure.log.info("AdventureScript Engine Version: " + AdventureScriptEngine.SCRIPT_ENGINE_VERSION);
 
-		currentScene.onInitialization();
-
+		Adventure.log.info("Finishing Engine Initialization");
 	}
 
 	private void engineLoop() {
-		boolean running = true;
+		isRunning = true;
 
 		int frames = 0;
 		double frameCounter = 0;
@@ -130,7 +134,9 @@ public class Engine implements Disposable {
 
 		double frameTime = 1.0 / 60;
 
-		while (running) {
+		currentScene.onStart();
+
+		while (isRunning) {
 			boolean render = false;
 
 			double startTime = glfwGetTime();
@@ -148,15 +154,14 @@ public class Engine implements Disposable {
 				glfwPollEvents();
 
 				if (glfwWindowShouldClose(window.getWindowPointer()))
-					running = false;
+					isRunning = false;
 
 				if (KeyListener.isKeyDown(GLFW_KEY_ESCAPE))
 					glfwSetWindowShouldClose(window.getWindowPointer(), true);
 
 				MouseListener.update();
-
 				currentScene.onInput(frameTime);
-				currentScene.onUpdate(frameTime);
+				currentScene.update(frameTime);
 
 				if (frameCounter >= 1.0) {
 					window.setWindowTitle("Adventure fps:" + frames);
@@ -173,8 +178,7 @@ public class Engine implements Disposable {
 					window.setIsResized(false);
 				}
 
-				currentScene.onRender(frameTime);
-
+				currentScene.render(frameTime);
 				glfwSwapBuffers(window.getWindowPointer());
 				frames++;
 			} else {
@@ -196,18 +200,28 @@ public class Engine implements Disposable {
 	public void switchScene(Scene scene) {
 		if (currentScene == null) {
 			currentScene = scene;
-			currentScene.onInitialization();
+			currentScene.onStart();
 		} else {
 			currentScene.onDispose();
 
 			currentScene = scene;
-			currentScene.onInitialization();
+			currentScene.onStart();
 		}
+		
+		Adventure.currentScene = currentScene;
 	}
 
 	public void run() {
 		engineLoop();
 		onDispose();
+	}
+
+	public Scene getCurrentScene() {
+		return currentScene;
+	}
+
+	public boolean isEngineRunning() {
+		return isRunning;
 	}
 
 	@Override

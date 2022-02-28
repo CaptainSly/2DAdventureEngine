@@ -1,3 +1,0 @@
-def test()
-	log.info("test")
-end

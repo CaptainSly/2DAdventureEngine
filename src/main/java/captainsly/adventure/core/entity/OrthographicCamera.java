@@ -31,6 +31,12 @@ public class OrthographicCamera {
 		return this.viewMatrix;
 	}
 
+	public void centerOnGameObject(GameObject obj) {
+		this.cameraPosition.x = obj.getObjectTransform().position.x;
+		this.cameraPosition.x = obj.getObjectTransform().position.y;
+
+	}
+
 	public Matrix4f getProjectionMatrix() {
 		return this.projectionMatrix;
 	}

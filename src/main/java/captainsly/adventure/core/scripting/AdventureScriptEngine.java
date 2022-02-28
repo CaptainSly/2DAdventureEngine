@@ -3,6 +3,7 @@ package captainsly.adventure.core.scripting;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jruby.Ruby;
 import org.jruby.embed.ScriptingContainer;
 
 import captainsly.adventure.Adventure;
@@ -12,23 +13,26 @@ public class AdventureScriptEngine {
 
 	public final static String SCRIPT_ENGINE_VERSION = "0.1.0";
 
+	private final Ruby ruby;
 	private final ScriptingContainer scriptContainer;
 
 	public AdventureScriptEngine() {
 		scriptContainer = new ScriptingContainer();
+		ruby = scriptContainer.getProvider().getRuntime();
 
 		// Setup JRuby classpath
 		List<String> classpaths = new ArrayList<>();
 		classpaths.add(scriptContainer.getHomeDirectory());
 		classpaths.add(Utils.ENGINE_WORKING_DIRECTORY + "scripts/");
+		classpaths.add(System.getProperty("java.class.path"));
 
 		scriptContainer.setLoadPaths(classpaths);
 
 		// Set Common 2DAdventureEngine Global Variables
 		scriptContainer.put("aseVersion", SCRIPT_ENGINE_VERSION);
-		scriptContainer.put("log", Adventure.log);
-		scriptContainer.put("rnJesus", Adventure.rnJesus);
-
+		scriptContainer.put("Log", Adventure.log);
+		scriptContainer.put("RnJesus", Adventure.rnJesus);
+		scriptContainer.put("AdventureEngine", Adventure.engine);
 	}
 
 	public String callMethodSi(String script, String method) {
@@ -101,9 +105,17 @@ public class AdventureScriptEngine {
 		scriptContainer.callMethod(reciever, method);
 	}
 
+	public Ruby getRubyContext() {
+		return ruby;
+	}
+	
+	public ScriptingContainer getAdventureScriptContainer() {
+		return scriptContainer;
+	}
+
 	public static void main(String[] args) {
 		AdventureScriptEngine ase = new AdventureScriptEngine();
 		ase.callMethode("scripts/test.tb", "test");
 	}
-	
+
 }

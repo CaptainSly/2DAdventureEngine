@@ -30,6 +30,9 @@ local.properties
 # CDT- autotools
 .autotools
 
+# 2dAdventureEngine User Directory
+adventure/
+
 # Java annotation processor (APT)
 .factorypath
 

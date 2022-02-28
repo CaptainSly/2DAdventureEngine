@@ -7,10 +7,7 @@ import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import org.joml.Matrix4f;
-import org.joml.Vector2d;
-import org.joml.Vector2i;
-import org.joml.Vector3f;
+import org.joml.*;
 import org.lwjgl.BufferUtils;
 
 import captainsly.adventure.core.render.mesh.Vertex;
@@ -101,6 +98,7 @@ public class Utils {
 			InputStream fileStream = Utils.class.getResourceAsStream("/" + fileName);
 			BufferedReader fileReader = new BufferedReader(new InputStreamReader(fileStream));
 
+			
 			String line = fileReader.readLine();
 
 			while (line != null) {
@@ -138,12 +136,34 @@ public class Utils {
 		return sBuilder.toString();
 	}
 
+	public static File loadFileInternal(String fileName) {
+		File f = new File(Utils.class.getResource(fileName).getFile());
+		if (f.exists())
+			return f;
+		return null;
+	}
+
+	public static File loadFileExternal(String fileName) {
+		File f = new File(fileName);
+		if (f.exists())
+			return f;
+		return null;
+	}
+
 	public static void createEngineFileStructure() {
 		File engineFolder = new File(ENGINE_WORKING_DIRECTORY);
 		engineFolder.mkdir();
 	}
 
 	public static boolean compareVector(Vector2d c1, Vector2d c2) {
+		return c1.x == c2.x && c1.y == c2.y;
+	}
+	
+	public static boolean compareVector(Vector2f c1, Vector2f c2) {
+		return c1.x == c2.x && c1.y == c2.y;
+	}
+	
+	public static boolean compareVector(Vector2i c1, Vector2i c2) {
 		return c1.x == c2.x && c1.y == c2.y;
 	}
 
