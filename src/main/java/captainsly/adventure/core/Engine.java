@@ -117,6 +117,9 @@ public class Engine implements Disposable {
 
 		Adventure.log.info("Creating GL Capabilities");
 		GL.createCapabilities();
+		
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		// Log Version Information
 		Adventure.log.info("LWJGL Version: " + Version.getVersion());

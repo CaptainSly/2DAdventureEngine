@@ -4,7 +4,6 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import org.joml.Vector2f;
 
-import captainsly.adventure.Adventure;
 import captainsly.adventure.core.AssetPool;
 import captainsly.adventure.core.Scene;
 import captainsly.adventure.core.entity.GameObject;
@@ -16,7 +15,7 @@ import captainsly.adventure.core.render.sprite.SpriteSheet;
 
 public class TestScene extends Scene {
 
-	private GameObject leafObj;
+	private GameObject testObj;
 
 	public TestScene() {
 		super();
@@ -24,28 +23,26 @@ public class TestScene extends Scene {
 
 	@Override
 	public void onInitialization() {
+		AssetPool.addSpriteSheet("testSheet", new SpriteSheet(AssetPool.getTexture("alchemist_idle"), 32, 48, 0));
+		SpriteSheet alchemistSheet = AssetPool.getSpriteSheet("testSheet");
 
-		Adventure.adventureScript.callMethodi(AssetPool.getScript("AseCore"), "testFunc");
-		
-		AssetPool.addSpriteSheet("test", new SpriteSheet(AssetPool.getTexture("alchemist_idle"), 32, 48, 0));
-		
-		SpriteSheet testSheet = AssetPool.getSpriteSheet("test");
-		GameObject testObj = new GameObject("testObj", new Transform(new Vector2f(100, 100), new Vector2f(100, 100)));
-		testObj.addComponent(new SpriteRendererComponent(testSheet.getSprite(2)));
+		testObj = new GameObject("testObj", new Transform(new Vector2f(100, 100), new Vector2f(256, 256)), -1);
+		testObj.addComponent(new SpriteRendererComponent(alchemistSheet.getSprite(0)));
 		addGameObjectToScene(testObj);
-		
+
 	}
 
 	@Override
 	public void onRender(double delta) {
 	}
 
-	float temp = 0.0f;
-
 	@Override
 	public void onUpdate(double delta) {
 
-		temp += 10 * delta;
+	}
+
+	@Override
+	public void onInput(double delta) {
 		// TEST Camera/Input Stuff
 		if (KeyListener.isKeyDown(GLFW_KEY_W))
 			camera.cameraPosition.y -= 5;
@@ -58,12 +55,6 @@ public class TestScene extends Scene {
 
 		if (MouseListener.isButtonDown(GLFW_MOUSE_BUTTON_LEFT))
 			camera.cameraPosition.zero();
-
-	}
-
-	@Override
-	public void onInput(double delta) {
-
 	}
 
 	@Override
