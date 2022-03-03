@@ -29,8 +29,8 @@ public class ShaderProgram implements Disposable {
 		if (shaderProgramId == 0)
 			throw new Exception("Could not create shader");
 
-		vShaderId = createShader(vShader, GL_VERTEX_SHADER);
-		fShaderId = createShader(fShader, GL_FRAGMENT_SHADER);
+		vShaderId = createShader(Utils.loadFileToStringInternal(vShader), GL_VERTEX_SHADER);
+		fShaderId = createShader(Utils.loadFileToStringInternal(fShader), GL_FRAGMENT_SHADER);
 		link();
 	}
 
@@ -135,6 +135,10 @@ public class ShaderProgram implements Disposable {
 
 	public void setUniform(String uniformName, Matrix4f value) {
 		glUniformMatrix4fv(getUniform(uniformName), false, Utils.createMatrixBuffer(value));
+	}
+	
+	public void setUniform(String uniformName, int[] value) {
+		glUniform1iv(getUniform(uniformName), value);
 	}
 
 	public int getUniform(String uniformName) {

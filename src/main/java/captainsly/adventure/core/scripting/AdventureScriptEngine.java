@@ -36,72 +36,72 @@ public class AdventureScriptEngine {
 	}
 
 	public String callMethodSi(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, String.class);
 	}
 
 	public String callMethodSi(String script, String method, Object... params) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, params, String.class);
 	}
 
 	public String callMethodSe(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, String.class);
 	}
 
 	public String callMethodSe(String script, String method, Object... params) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, params, String.class);
 	}
 
 	public float callMethodFi(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, Float.class);
 	}
 
 	public float callMethodFi(String script, String method, Object... params) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, params, Float.class);
 	}
 
 	public float callMethodFe(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, Float.class);
 	}
 
 	public float callMethodFe(String script, String method, Object... params) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, params, Float.class);
 	}
 
 	public boolean callMethodBi(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, Boolean.class);
 	}
 
 	public boolean callMethodBi(String script, String method, Object... params) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, params, Boolean.class);
 	}
 
 	public boolean callMethodBe(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, Boolean.class);
 	}
 
 	public boolean callMethodBe(String script, String method, Object... params) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		return scriptContainer.callMethod(reciever, method, params, Boolean.class);
 	}
 
 	public void callMethodi(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringInternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		scriptContainer.callMethod(reciever, method);
 	}
 
 	public void callMethode(String script, String method) {
-		Object reciever = scriptContainer.runScriptlet(Utils.loadFileToStringExternal(script));
+		Object reciever = scriptContainer.runScriptlet(script);
 		scriptContainer.callMethod(reciever, method);
 	}
 
@@ -111,11 +111,6 @@ public class AdventureScriptEngine {
 	
 	public ScriptingContainer getAdventureScriptContainer() {
 		return scriptContainer;
-	}
-
-	public static void main(String[] args) {
-		AdventureScriptEngine ase = new AdventureScriptEngine();
-		ase.callMethode("scripts/test.tb", "test");
 	}
 
 }

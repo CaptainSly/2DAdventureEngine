@@ -5,12 +5,12 @@ import static org.lwjgl.opengl.GL11.glGetString;
 
 import java.io.*;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
-import org.joml.*;
+import org.joml.Matrix4f;
+import org.joml.Vector2d;
+import org.joml.Vector2f;
+import org.joml.Vector2i;
 import org.lwjgl.BufferUtils;
-
-import captainsly.adventure.core.render.mesh.Vertex;
 
 public class Utils {
 
@@ -23,64 +23,13 @@ public class Utils {
 	}
 
 	/* Buffer Utility Methods */
-
-	public static FloatBuffer createFloatBuffer(int size) {
-		return BufferUtils.createFloatBuffer(size);
-	}
-
-	public static IntBuffer createFlippedUvCoordsBuffer(Vector2i[] data) {
-		IntBuffer buffer = BufferUtils.createIntBuffer(data.length * 2);
-
-		for (int i = 0; i < data.length; i++) {
-			buffer.put(data[i].x);
-			buffer.put(data[i].y);
-		}
-
-		buffer.flip();
-		return buffer;
-	}
-
-	public static IntBuffer createIndicesBuffer(int[] data) {
-		IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
-		buffer.put(data).flip();
-		return buffer;
-	}
-
 	public static FloatBuffer createMatrixBuffer(Matrix4f data) {
-		FloatBuffer buffer = createFloatBuffer(16);
+		FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
 		data.get(buffer);
 
 		return buffer;
 	}
-
-	public static FloatBuffer createFlippedColorBuffer(Vector3f[] data) {
-		FloatBuffer buffer = createFloatBuffer(data.length * 3);
-
-		for (int i = 0; i < data.length; i++) {
-			buffer.put(data[i].x);
-			buffer.put(data[i].y);
-			buffer.put(data[i].z);
-		}
-
-		buffer.flip();
-		return buffer;
-
-	}
-
-	public static FloatBuffer createFlippedVerticesBuffer(Vertex[] data) {
-		FloatBuffer buffer = createFloatBuffer(data.length * Vertex.SIZE);
-
-		for (int i = 0; i < data.length; i++) {
-			buffer.put(data[i].getPosition().x);
-			buffer.put(data[i].getPosition().y);
-			buffer.put(data[i].getPosition().z);
-		}
-
-		buffer.flip();
-		return buffer;
-
-	}
-
+	
 	/* File Utiltiy Methods */
 
 	/**

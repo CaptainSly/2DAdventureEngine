@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Disposable;
+import captainsly.adventure.core.input.ControllerListener;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
 import captainsly.adventure.core.render.Window;
@@ -45,8 +46,10 @@ public class Engine implements Disposable {
 
 		currentScene = scene;
 		Adventure.currentScene = currentScene;
+		
 		// Create the engine companion directory and it's sub directories if it does not
 		// exist.
+		
 		/*
 		 * Companion Directory Layout adventure \_ scripts \_ mods
 		 */
@@ -67,6 +70,7 @@ public class Engine implements Disposable {
 
 	private void initalizeEngine() {
 		Adventure.log.info("Starting Engine Initialization");
+		
 		// Setup GLFW Error Callback
 		GLFWErrorCallback.createPrint(System.err).set();
 
@@ -83,6 +87,7 @@ public class Engine implements Disposable {
 		glfwSetMouseButtonCallback(window.getWindowPointer(), MouseListener::mouseButtonCallback);
 		glfwSetCursorPosCallback(window.getWindowPointer(), MouseListener::mousePosCallback);
 		glfwSetScrollCallback(window.getWindowPointer(), MouseListener::mouseScrollCallback);
+		glfwSetJoystickCallback(ControllerListener::controllerCallback);
 
 		glfwSetFramebufferSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
 			this.window.setWindowWidth(windowWidth);
@@ -107,7 +112,7 @@ public class Engine implements Disposable {
 		} // the stack frame is popped automatically
 
 		glfwMakeContextCurrent(window.getWindowPointer());
-		glfwSwapInterval(1);
+//		glfwSwapInterval(1);
 		glfwShowWindow(window.getWindowPointer());
 
 		Adventure.log.info("Creating GL Capabilities");
@@ -134,6 +139,7 @@ public class Engine implements Disposable {
 
 		double frameTime = 1.0 / 60;
 
+		
 		currentScene.onStart();
 
 		while (isRunning) {
@@ -141,10 +147,7 @@ public class Engine implements Disposable {
 
 			double startTime = glfwGetTime();
 			double processedTime = startTime - lastTime;
-			lastTime = startTime;
-
-			unprocessedTime += processedTime;
-			frameCounter += processedTime;
+			
 
 			while (unprocessedTime > frameTime) {
 				render = true;
@@ -189,6 +192,10 @@ public class Engine implements Disposable {
 				}
 			}
 
+			lastTime = startTime;
+
+			unprocessedTime += processedTime;
+			frameCounter += processedTime;
 		}
 	}
 
@@ -207,7 +214,7 @@ public class Engine implements Disposable {
 			currentScene = scene;
 			currentScene.onStart();
 		}
-		
+
 		Adventure.currentScene = currentScene;
 	}
 
@@ -236,7 +243,6 @@ public class Engine implements Disposable {
 		// Terminate GLFW and free the error callback
 		glfwTerminate();
 		glfwSetErrorCallback(null).free();
-
 	}
 
 }

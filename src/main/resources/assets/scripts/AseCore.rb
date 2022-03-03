@@ -20,6 +20,6 @@ def debug(msg)
 	Log.debug(msg)
 end
 
-
 def testFunc
+	info("test message from Ruby Method Wrapper")
 end
