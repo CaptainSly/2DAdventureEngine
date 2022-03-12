@@ -9,10 +9,13 @@ import captainsly.adventure.core.entity.components.Component;
 
 public class GameObject {
 
-	private final String objectId;
-	private final Transform transform;
-	private int zIndex;
-	private List<Component> components;
+	private String objectId = "";
+	private Transform transform = new Transform();
+	private int zIndex = 0;
+	private List<Component> components = new ArrayList<>();
+
+	public GameObject() {
+	}
 
 	public GameObject(String objectId) {
 		this.objectId = objectId;
@@ -68,6 +71,11 @@ public class GameObject {
 		this.components.add(component);
 		component.gameObject = this;
 	}
+	
+	public void addComponents(Component...components) {
+		for (Component c : components) 
+			addComponent(c);
+	}
 
 	public void update(double delta) {
 
@@ -84,6 +92,23 @@ public class GameObject {
 		}
 	}
 
+	public void imgui() {
+		for (Component c : components)
+			c.imgui();
+	}
+
+	public void setObjectId(String objectId) {
+		this.objectId = objectId;
+	}
+
+	public void setTransform(Transform transform) {
+		this.transform = transform;
+	}
+
+	public void setzIndex(int zIndex) {
+		this.zIndex = zIndex;
+	}
+
 	public Transform getObjectTransform() {
 		return transform;
 	}
@@ -91,7 +116,7 @@ public class GameObject {
 	public String getObjectId() {
 		return objectId;
 	}
-	
+
 	public int getZIndex() {
 		return zIndex;
 	}

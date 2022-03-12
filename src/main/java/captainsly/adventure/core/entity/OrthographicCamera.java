@@ -33,7 +33,7 @@ public class OrthographicCamera {
 
 	public void centerOnGameObject(GameObject obj) {
 		this.cameraPosition.x = obj.getObjectTransform().position.x;
-		this.cameraPosition.x = obj.getObjectTransform().position.y;
+		this.cameraPosition.y = obj.getObjectTransform().position.y;
 
 	}
 

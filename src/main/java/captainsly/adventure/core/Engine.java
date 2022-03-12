@@ -17,13 +17,19 @@ import org.lwjgl.system.MemoryStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.GsonBuilder;
+
 import captainsly.adventure.Adventure;
+import captainsly.adventure.core.entity.GameObject;
+import captainsly.adventure.core.entity.components.Component;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.input.ControllerListener;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
 import captainsly.adventure.core.render.Window;
 import captainsly.adventure.core.scripting.AdventureScriptEngine;
+import captainsly.adventure.core.typeadapters.ComponentTypeAdapter;
+import captainsly.adventure.core.typeadapters.GameObjectTypeAdapter;
 import captainsly.adventure.utils.Utils;
 
 public class Engine implements Disposable {
@@ -33,8 +39,10 @@ public class Engine implements Disposable {
 	private Window window;
 	private Scene currentScene;
 	private AdventureScriptEngine adventureScript;
-
+	private ImGuiLayer guiLayer;
 	private boolean isRunning;
+
+	private int engineFps;
 
 	public Engine(Scene scene) {
 		Adventure.engine = this;
@@ -46,17 +54,15 @@ public class Engine implements Disposable {
 
 		currentScene = scene;
 		Adventure.currentScene = currentScene;
-		
+
 		// Create the engine companion directory and it's sub directories if it does not
 		// exist.
-		
-		/*
-		 * Companion Directory Layout adventure \_ scripts \_ mods
-		 */
+
+		// Companion Directory Layout
 		if (!(new File(Utils.ENGINE_WORKING_DIRECTORY).exists())) {
 			Utils.createEngineFileStructure();
 
-			String[] paths = new String[] { "scripts", "mods" };
+			String[] paths = new String[] { "scripts", "mods", "config", "logs", "saves", };
 
 			for (int i = 0; i < paths.length; i++) {
 				File compDir = new File(Utils.ENGINE_WORKING_DIRECTORY + paths[i]);
@@ -70,7 +76,12 @@ public class Engine implements Disposable {
 
 	private void initalizeEngine() {
 		Adventure.log.info("Starting Engine Initialization");
-		
+		Adventure.gson = new GsonBuilder().setPrettyPrinting()
+				
+				 .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
+				 .registerTypeAdapter(GameObject.class, new GameObjectTypeAdapter())
+				.create();
+
 		// Setup GLFW Error Callback
 		GLFWErrorCallback.createPrint(System.err).set();
 
@@ -92,7 +103,6 @@ public class Engine implements Disposable {
 		glfwSetFramebufferSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
 			this.window.setWindowWidth(windowWidth);
 			this.window.setWindowHeight(windowHeight);
-			this.window.setIsResized(true);
 		});
 
 		// Get the thread stack and push a new frame
@@ -112,21 +122,25 @@ public class Engine implements Disposable {
 		} // the stack frame is popped automatically
 
 		glfwMakeContextCurrent(window.getWindowPointer());
-//		glfwSwapInterval(1);
+		glfwSwapInterval(1);
 		glfwShowWindow(window.getWindowPointer());
 
 		Adventure.log.info("Creating GL Capabilities");
 		GL.createCapabilities();
-		
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-		// Log Version Information
-		Adventure.log.info("LWJGL Version: " + Version.getVersion());
-		Adventure.log.info("OpenGL Version: " + Utils.getOpenGLVersion());
-		Adventure.log.info("JRuby Version: " + Constants.VERSION + " | Ruby Version: " + Constants.RUBY_VERSION);
-		Adventure.log.info("2DAdventure Engine Version: " + Utils.ENGINE_VERSION);
-		Adventure.log.info("AdventureScript Engine Version: " + AdventureScriptEngine.SCRIPT_ENGINE_VERSION);
+		guiLayer = new ImGuiLayer(window.getWindowPointer());
+
+		String[] versions = { "LWJGL Version: " + Version.getVersion(), "OpenGL Version: " + Utils.getOpenGLVersion(),
+				"JRuby Version: " + Constants.VERSION + " | Ruby Version: " + Constants.RUBY_VERSION,
+				"AdventureScript Engine Version: " + AdventureScriptEngine.SCRIPT_ENGINE_VERSION
+
+		};
+
+		for (String version : versions)
+			Adventure.log.info(version);
 
 		Adventure.log.info("Finishing Engine Initialization");
 	}
@@ -142,7 +156,6 @@ public class Engine implements Disposable {
 
 		double frameTime = 1.0 / 60;
 
-		
 		currentScene.onStart();
 
 		while (isRunning) {
@@ -150,7 +163,6 @@ public class Engine implements Disposable {
 
 			double startTime = glfwGetTime();
 			double processedTime = startTime - lastTime;
-			
 
 			while (unprocessedTime > frameTime) {
 				render = true;
@@ -158,6 +170,8 @@ public class Engine implements Disposable {
 				unprocessedTime -= frameTime;
 
 				glfwPollEvents();
+
+//				glViewport(0, 0, window.getWindowWidth(), window.getWindowHeight());
 
 				if (glfwWindowShouldClose(window.getWindowPointer()))
 					isRunning = false;
@@ -170,7 +184,7 @@ public class Engine implements Disposable {
 				currentScene.update(frameTime);
 
 				if (frameCounter >= 1.0) {
-					window.setWindowTitle("Adventure fps:" + frames);
+					engineFps = frames;
 					frames = 0;
 					frameCounter = 0;
 				}
@@ -178,13 +192,11 @@ public class Engine implements Disposable {
 			}
 
 			if (render) {
-
-				if (window.isResized()) {
-					glViewport(0, 0, window.getWindowWidth(), window.getWindowHeight());
-					window.setIsResized(false);
-				}
+				render(1, 1, 1);
 
 				currentScene.render(frameTime);
+				guiLayer.render((float) frameTime, currentScene);
+
 				glfwSwapBuffers(window.getWindowPointer());
 				frames++;
 			} else {
@@ -203,8 +215,9 @@ public class Engine implements Disposable {
 	}
 
 	public void render(float r, float g, float b) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(r, g, b, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	}
 
 	public void switchScene(Scene scene) {
@@ -226,6 +239,10 @@ public class Engine implements Disposable {
 		onDispose();
 	}
 
+	public int getEngineFPS() {
+		return engineFps;
+	}
+
 	public Scene getCurrentScene() {
 		return currentScene;
 	}
@@ -238,6 +255,7 @@ public class Engine implements Disposable {
 	public void onDispose() {
 		Adventure.log.info("Disposing");
 		currentScene.onDispose();
+		adventureScript.onDispose();
 
 		// Free the window callbacks
 		Callbacks.glfwFreeCallbacks(window.getWindowPointer());

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import captainsly.adventure.core.entity.GameObject;
-import captainsly.adventure.core.entity.components.SpriteRendererComponent;
+import captainsly.adventure.core.entity.components.SpriteRenderer;
 import captainsly.adventure.core.impl.Disposable;
 
 public class Renderer implements Disposable {
@@ -19,7 +19,7 @@ public class Renderer implements Disposable {
 	}
 
 	public void addGameObject(GameObject gObj) {
-		SpriteRendererComponent sprite = gObj.getComponent(SpriteRendererComponent.class);
+		SpriteRenderer sprite = gObj.getComponent(SpriteRenderer.class);
 
 		if (sprite != null)
 			add(sprite);
@@ -30,7 +30,7 @@ public class Renderer implements Disposable {
 			batch.render();
 	}
 
-	private void add(SpriteRendererComponent sprite) {
+	private void add(SpriteRenderer sprite) {
 		boolean added = false;
 
 		for (RenderBatch batch : batches) {

@@ -18,6 +18,7 @@ public class Utils {
 	public static final String ENGINE_WORKING_DIRECTORY = System.getProperty("user.dir") + "/adventure/";
 	public static final String ENGINE_VERSION = "0.1.0";
 
+	
 	public static String getOpenGLVersion() {
 		return glGetString(GL_VERSION);
 	}

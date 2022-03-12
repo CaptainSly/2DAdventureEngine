@@ -21,7 +21,7 @@ import org.joml.Vector4f;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.AssetPool;
-import captainsly.adventure.core.entity.components.SpriteRendererComponent;
+import captainsly.adventure.core.entity.components.SpriteRenderer;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.render.shaders.ShaderProgram;
 
@@ -46,7 +46,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 	private final int VERTEX_SIZE = 9;
 	private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 
-	private SpriteRendererComponent[] sprites;
+	private SpriteRenderer[] sprites;
 	private List<Texture> batchTextures;
 	private int[] textureSlots = { 0, 1, 2, 3, 4, 5, 6, 7 };
 	private int numSprites;
@@ -69,7 +69,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 			e.printStackTrace();
 		}
 
-		sprites = new SpriteRendererComponent[maxBatchSize];
+		sprites = new SpriteRenderer[maxBatchSize];
 		this.maxBatchSize = maxBatchSize;
 		this.zIndex = zIndex;
 		numSprites = 0;
@@ -116,7 +116,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 		boolean rebufferData = false;
 
 		for (int i = 0; i < numSprites; i++) {
-			SpriteRendererComponent sprite = sprites[i];
+			SpriteRenderer sprite = sprites[i];
 			if (sprite.isDirty()) {
 				loadVertexProperties(i);
 				sprite.clean();
@@ -159,7 +159,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 		shader.unbind();
 	}
 
-	public void addSprite(SpriteRendererComponent sprite) {
+	public void addSprite(SpriteRenderer sprite) {
 		int index = numSprites;
 		sprites[index] = sprite;
 		numSprites++;
@@ -181,7 +181,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 	}
 
 	private void loadVertexProperties(int index) {
-		SpriteRendererComponent sprite = sprites[index];
+		SpriteRenderer sprite = sprites[index];
 		int offset = index * 4 * VERTEX_SIZE;
 
 		Vector4f color = sprite.getSpriteColor();

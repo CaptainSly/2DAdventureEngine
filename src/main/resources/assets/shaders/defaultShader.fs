@@ -11,8 +11,12 @@ out vec4 fragColor;
 void main()
 {
 
-    int texId = int(fTexId);
+	if (fTexId > 0) {
 
-    fragColor = exColor * texture(uTextures[texId], exUVCoords);
-
+		int texId = int(fTexId);
+		fragColor = exColor * texture(uTextures[texId], exUVCoords);
+	
+	} else {
+		fragColor = exColor;
+	}
 }

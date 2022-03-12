@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.joml.Vector2f;
 
-import captainsly.adventure.Adventure;
 import captainsly.adventure.core.render.Texture;
 
 public class SpriteSheet {
@@ -20,7 +19,6 @@ public class SpriteSheet {
 		// Equation to figure out how many sprites are in a sheet
 		// numSprites = (textureWidth / spriteWidth) * (textureHeight / spriteHeight)
 		int numSprites = (parentTexture.getWidth() / spriteWidth) * (parentTexture.getHeight() / spriteHeight);
-		Adventure.log.debug("Number of Sprites in SpriteSheet: " + numSprites);
 
 		int currentX = 0, currentY = parentTexture.getHeight() - spriteHeight;
 
@@ -33,7 +31,10 @@ public class SpriteSheet {
 			Vector2f[] uvCoords = { new Vector2f(rightX, topY), new Vector2f(rightX, bottomY),
 					new Vector2f(leftX, bottomY), new Vector2f(leftX, topY) };
 
-			Sprite sprite = new Sprite(this.parentTexture, uvCoords);
+			Sprite sprite = new Sprite();
+			sprite.setTexture(this.parentTexture);
+			sprite.setUVCoords(uvCoords);
+
 			spriteSheet.add(sprite);
 
 			currentX += spriteWidth + padding;

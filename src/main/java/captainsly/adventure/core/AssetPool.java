@@ -41,7 +41,7 @@ public class AssetPool {
 	public static SpriteSheet getSpriteSheet(String spriteSheetResourceName) {
 		if (spriteSheetsMap.containsKey(spriteSheetResourceName))
 			return spriteSheetsMap.get(spriteSheetResourceName);
-
+		
 		return null;
 	}
 
@@ -60,7 +60,8 @@ public class AssetPool {
 			return texturesMap.get(textureResourceName);
 		} else {
 			// Create new texture
-			Texture texture = new Texture("assets/textures/" + textureResourceName + ".png");
+			Texture texture = new Texture();
+			texture.setTexturePath("assets/textures/" + textureResourceName + ".png");
 			texturesMap.put(textureResourceName, texture);
 			return getTexture(textureResourceName);
 		}

@@ -20,12 +20,15 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryUtil;
 
 public class Texture {
-	private final String filePath;
-	private final int textureId;
-	private final ByteBuffer image;
+	private String filePath;
+	private int textureId;
 	private int width, height;
 
-	public Texture(String path) {
+	public Texture() {
+
+	}
+
+	public void setTexturePath(String path) {
 		this.filePath = path;
 		ByteBuffer imageBuffer;
 		try {
@@ -52,7 +55,7 @@ public class Texture {
 		IntBuffer channels = BufferUtils.createIntBuffer(1);
 
 		stbi_set_flip_vertically_on_load(true);
-		image = stbi_load_from_memory(imageBuffer, width, height, channels, 0);
+		ByteBuffer image = stbi_load_from_memory(imageBuffer, width, height, channels, 0);
 
 		if (image != null) {
 			this.width = width.get(0);

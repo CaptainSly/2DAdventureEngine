@@ -1,11 +1,12 @@
 package captainsly;
 
 import captainsly.adventure.core.Engine;
+import captainsly.adventure.core.editor.Editor;
 
 public class Main {
 
 	public static void main(String[] args) {
-		Engine engine = new Engine(new TestScene());
+		Engine engine = new Engine(new Editor());
 		engine.run();
 	}
 
