@@ -12,7 +12,7 @@ public class SpriteRenderer extends Component {
 
 	private Sprite sprite = new Sprite();
 	private transient Transform lastTransform;
-	private boolean isDirty = false;
+	private transient boolean isDirty = false;
 
 	public SpriteRenderer() {
 	}
@@ -39,6 +39,8 @@ public class SpriteRenderer extends Component {
 
 	@Override
 	public void imgui() {
+		super.imgui();
+
 		float[] colors = { getSpriteColor().x, getSpriteColor().y, getSpriteColor().z, getSpriteColor().w };
 		if (ImGui.colorPicker4("Color Picker: ", colors)) {
 			setColor(new Vector4f(colors[0], colors[1], colors[2], colors[3]));

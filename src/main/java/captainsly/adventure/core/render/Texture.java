@@ -115,6 +115,10 @@ public class Texture {
 		return newBuffer;
 	}
 
+	public int getTextureId() {
+		return textureId;
+	}
+	
 	public int getWidth() {
 		return width;
 	}

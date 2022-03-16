@@ -6,7 +6,9 @@ import org.joml.Vector2d;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Disposable;
+import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
+import captainsly.adventure.core.scenes.Scene;
 import imgui.ImFontAtlas;
 import imgui.ImFontConfig;
 import imgui.ImGui;
@@ -99,6 +101,10 @@ public class ImGuiLayer implements Disposable {
 			io.setKeyShift(io.getKeysDown(GLFW_KEY_LEFT_SHIFT) || io.getKeysDown(GLFW_KEY_RIGHT_SHIFT));
 			io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
 			io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
+			
+			
+			if (!io.getWantCaptureKeyboard())
+				KeyListener.keyCallback(w, key, scancode, action, mods);
 
 		});
 
@@ -122,6 +128,9 @@ public class ImGuiLayer implements Disposable {
 			if (!io.getWantCaptureMouse() && mouseDown[1]) {
 				ImGui.setWindowFocus(null);
 			}
+			
+			if (!io.getWantCaptureMouse())
+				MouseListener.mouseButtonCallback(w, button, action, mods);
 		});
 
 		glfwSetScrollCallback(glfwWindowPointer, (w, xOffset, yOffset) -> {
@@ -159,7 +168,7 @@ public class ImGuiLayer implements Disposable {
 		fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
 
 		fontConfig.setPixelSnapH(true);
-		fontAtlas.addFontFromFileTTF("src/main/resources/assets/fonts/prstart.ttf", 10, fontConfig);
+		fontAtlas.addFontFromFileTTF("src/main/resources/assets/fonts/typewriter.ttf", 18, fontConfig);
 
 		fontConfig.destroy(); // After all fonts were added we don't need this config more
 

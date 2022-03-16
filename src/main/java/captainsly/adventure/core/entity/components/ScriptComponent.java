@@ -15,9 +15,20 @@ public class ScriptComponent extends Component {
 	}
 
 	@Override
+	public void start() {
+	}
+
+	@Override
+	public void update(double delta) {
+	}
+
+	@Override
 	public void imgui() {
 		if (ImGui.button("Test"))
 			onActivate();
+
+		ImGui.newLine();
+		super.imgui();
 	}
 
 	public void onActivate() {

@@ -1,4 +1,4 @@
-package captainsly.adventure.core;
+package captainsly.adventure.core.scenes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,6 @@ public abstract class Scene implements Disposable {
 	private List<GameObject> gameObjects;
 	protected OrthographicCamera camera;
 	protected Renderer renderer;
-
 	protected GameObject activeGameObject = null;
 
 	public Scene() {
@@ -48,6 +47,7 @@ public abstract class Scene implements Disposable {
 	}
 
 	public void render(double frameTime) {
+
 		renderer.render();
 		onRender(frameTime);
 	}

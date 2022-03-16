@@ -9,6 +9,9 @@ import captainsly.adventure.core.entity.components.Component;
 
 public class GameObject {
 
+	private static int ID_COUNTER = 0;
+	private int uID = -1;
+
 	private String objectId = "";
 	private Transform transform = new Transform();
 	private int zIndex = 0;
@@ -22,6 +25,8 @@ public class GameObject {
 		components = new ArrayList<>();
 		transform = new Transform();
 		zIndex = 0;
+
+		this.uID = ID_COUNTER++;
 	}
 
 	public GameObject(String objectId, Transform transform, int zIndex) {
@@ -29,6 +34,10 @@ public class GameObject {
 		this.transform = transform;
 		components = new ArrayList<>();
 		this.zIndex = zIndex;
+	}
+
+	public GameObject(String objectId, Transform transform) {
+		this(objectId, transform, 0);
 	}
 
 	public GameObject(String objectId, Vector2f position, Vector2f scale, int zIndex) {
@@ -68,12 +77,14 @@ public class GameObject {
 	}
 
 	public void addComponent(Component component) {
+		component.generateId();
+
 		this.components.add(component);
 		component.gameObject = this;
 	}
-	
-	public void addComponents(Component...components) {
-		for (Component c : components) 
+
+	public void addComponents(Component... components) {
+		for (Component c : components)
 			addComponent(c);
 	}
 
@@ -97,6 +108,10 @@ public class GameObject {
 			c.imgui();
 	}
 
+	public static void init(int maxID) {
+		ID_COUNTER = maxID;
+	}
+
 	public void setObjectId(String objectId) {
 		this.objectId = objectId;
 	}
@@ -109,12 +124,20 @@ public class GameObject {
 		this.zIndex = zIndex;
 	}
 
+	public List<Component> getComponents() {
+		return components;
+	}
+
 	public Transform getObjectTransform() {
 		return transform;
 	}
 
 	public String getObjectId() {
 		return objectId;
+	}
+
+	public int getuID() {
+		return uID;
 	}
 
 	public int getZIndex() {

@@ -18,6 +18,9 @@ public class Window {
 	public Window(String windowTitle, int windowWidth, int windowHeight) {
 		windowWidthBuffer = BufferUtils.createIntBuffer(1);
 		windowHeightBuffer = BufferUtils.createIntBuffer(1);
+		
+		this.windowWidth = windowWidth;
+		this.windowHeight = windowHeight;
 
 		glfwDefaultWindowHints();
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);

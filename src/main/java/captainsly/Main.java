@@ -1,7 +1,7 @@
 package captainsly;
 
 import captainsly.adventure.core.Engine;
-import captainsly.adventure.core.editor.Editor;
+import captainsly.adventure.core.scenes.Editor;
 
 public class Main {
 

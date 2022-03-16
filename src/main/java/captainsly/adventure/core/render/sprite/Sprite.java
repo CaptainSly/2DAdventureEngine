@@ -11,6 +11,8 @@ public class Sprite {
 	private Vector4f spriteColor = new Vector4f(1, 1, 1, 1);
 	private Vector2f[] uvCoords = { new Vector2f(1, 1), new Vector2f(1, 0), new Vector2f(0, 0), new Vector2f(0, 1), };
 
+	private float spriteWidth, spriteHeight;
+
 	public Sprite() {
 
 	}
@@ -45,6 +47,26 @@ public class Sprite {
 
 	public Vector2f[] getUvCoords() {
 		return uvCoords;
+	}
+	
+	public int getSpriteTextureId() {
+		return spriteTexture == null ? -1 : spriteTexture.getTextureId();
+	}
+
+	public float getSpriteWidth() {
+		return spriteWidth;
+	}
+
+	public float getSpriteHeight() {
+		return spriteHeight;
+	}
+
+	public void setSpriteWidth(float spriteWidth) {
+		this.spriteWidth = spriteWidth;
+	}
+
+	public void setSpriteHeight(float spriteHeight) {
+		this.spriteHeight = spriteHeight;
 	}
 
 	public void setTexture(Texture texture) {

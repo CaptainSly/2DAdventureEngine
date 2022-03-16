@@ -26,7 +26,9 @@ import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.input.ControllerListener;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
+import captainsly.adventure.core.render.DebugRenderer;
 import captainsly.adventure.core.render.Window;
+import captainsly.adventure.core.scenes.Scene;
 import captainsly.adventure.core.scripting.AdventureScriptEngine;
 import captainsly.adventure.core.typeadapters.ComponentTypeAdapter;
 import captainsly.adventure.core.typeadapters.GameObjectTypeAdapter;
@@ -77,10 +79,9 @@ public class Engine implements Disposable {
 	private void initalizeEngine() {
 		Adventure.log.info("Starting Engine Initialization");
 		Adventure.gson = new GsonBuilder().setPrettyPrinting()
-				
-				 .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
-				 .registerTypeAdapter(GameObject.class, new GameObjectTypeAdapter())
-				.create();
+
+				.registerTypeAdapter(Component.class, new ComponentTypeAdapter())
+				.registerTypeAdapter(GameObject.class, new GameObjectTypeAdapter()).create();
 
 		// Setup GLFW Error Callback
 		GLFWErrorCallback.createPrint(System.err).set();
@@ -170,15 +171,15 @@ public class Engine implements Disposable {
 				unprocessedTime -= frameTime;
 
 				glfwPollEvents();
-
-//				glViewport(0, 0, window.getWindowWidth(), window.getWindowHeight());
-
+				DebugRenderer.beginFrame();
+				
 				if (glfwWindowShouldClose(window.getWindowPointer()))
 					isRunning = false;
 
 				if (KeyListener.isKeyDown(GLFW_KEY_ESCAPE))
 					glfwSetWindowShouldClose(window.getWindowPointer(), true);
 
+				
 				MouseListener.update();
 				currentScene.onInput(frameTime);
 				currentScene.update(frameTime);
@@ -194,6 +195,8 @@ public class Engine implements Disposable {
 			if (render) {
 				render(1, 1, 1);
 
+				DebugRenderer.draw();
+				
 				currentScene.render(frameTime);
 				guiLayer.render((float) frameTime, currentScene);
 
@@ -216,7 +219,7 @@ public class Engine implements Disposable {
 
 	public void render(float r, float g, float b) {
 		glClearColor(r, g, b, 1);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 	}
 
@@ -256,6 +259,7 @@ public class Engine implements Disposable {
 		Adventure.log.info("Disposing");
 		currentScene.onDispose();
 		adventureScript.onDispose();
+		guiLayer.onDispose();
 
 		// Free the window callbacks
 		Callbacks.glfwFreeCallbacks(window.getWindowPointer());

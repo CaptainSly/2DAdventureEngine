@@ -11,25 +11,24 @@ import imgui.ImGui;
 
 public abstract class Component {
 
+	private static int ID_COUNTER = 0;
+	private int uID = -1;
 	public transient GameObject gameObject = null;
-
-	public void start() {
-	}
 
 	@SuppressWarnings("rawtypes")
 	public void imgui() {
-		try {
-			Field[] fields = this.getClass().getFields();
+		Field[] fields = this.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			boolean isPrivate = Modifier.isPrivate(field.getModifiers());
+			boolean isTransient = Modifier.isTransient(field.getModifiers());
 
-			for (Field field : fields) {
-				boolean isPrivate = Modifier.isPrivate(field.getModifiers());
-				boolean isTransient = Modifier.isTransient(field.getModifiers());
+			if (isTransient)
+				continue;
 
-				if (isTransient)
-					continue;
-				
-				if (isPrivate)
-					field.setAccessible(true);
+			if (isPrivate)
+				field.setAccessible(true);
+
+			try {
 
 				Class type = field.getType();
 				Object value = field.get(this);
@@ -38,9 +37,8 @@ public abstract class Component {
 				if (type == int.class) {
 					int val = (int) value;
 					int[] imInt = { val };
-					if (ImGui.dragInt(name + ": ", imInt)) {
+					if (ImGui.dragInt(name + ": ", imInt))
 						field.set(this, imInt[0]);
-					}
 				} else if (type == float.class) {
 					float val = (float) value;
 					float[] imFloat = { val };
@@ -64,14 +62,30 @@ public abstract class Component {
 
 				if (isPrivate)
 					field.setAccessible(false);
-			}
 
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			} catch (IllegalAccessException | IllegalArgumentException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-
-	public void update(double delta) {
+	
+	public void generateId() {
+		if (uID == -1) {
+			this.uID = ID_COUNTER++;
+		}
 	}
+	
 
+	public abstract void start();
+
+	public abstract void update(double delta);
+
+	public static void init(int maxId) {
+		ID_COUNTER = maxId;
+	}
+	
+	public int getuID() {
+		return uID;
+	}
+	
 }

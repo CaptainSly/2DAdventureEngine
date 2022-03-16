@@ -12,6 +12,10 @@ public class SpriteSheet {
 	private Texture parentTexture;
 	private List<Sprite> spriteSheet;
 
+	public SpriteSheet(Texture parentTexture, int spriteWidth, int spriteHeight) {
+		this(parentTexture, spriteWidth, spriteHeight, 0);
+	}
+	
 	public SpriteSheet(Texture parentTexture, int spriteWidth, int spriteHeight, int padding) {
 		spriteSheet = new ArrayList<>();
 		this.parentTexture = parentTexture;
@@ -34,6 +38,8 @@ public class SpriteSheet {
 			Sprite sprite = new Sprite();
 			sprite.setTexture(this.parentTexture);
 			sprite.setUVCoords(uvCoords);
+			sprite.setSpriteWidth(spriteWidth);
+			sprite.setSpriteHeight(spriteHeight);
 
 			spriteSheet.add(sprite);
 
@@ -53,6 +59,10 @@ public class SpriteSheet {
 
 	public Sprite getSprite(int index) {
 		return spriteSheet.get(index);
+	}
+	
+	public int getSpriteSheetSize() {
+		return spriteSheet.size();
 	}
 
 }
