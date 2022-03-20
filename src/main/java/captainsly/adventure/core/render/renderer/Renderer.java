@@ -1,4 +1,4 @@
-package captainsly.adventure.core.render;
+package captainsly.adventure.core.render.renderer;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,12 +7,16 @@ import java.util.List;
 import captainsly.adventure.core.entity.GameObject;
 import captainsly.adventure.core.entity.components.SpriteRenderer;
 import captainsly.adventure.core.impl.Disposable;
+import captainsly.adventure.core.render.Texture;
+import captainsly.adventure.core.render.shaders.Shader;
 
 public class Renderer implements Disposable {
 
 	private final int MAX_BATCH_SIZE = 1000;
 
 	private List<RenderBatch> batches;
+
+	private static Shader currentShader;
 
 	public Renderer() {
 		batches = new ArrayList<>();
@@ -26,8 +30,10 @@ public class Renderer implements Disposable {
 	}
 
 	public void render() {
-		for (RenderBatch batch : batches) 
+		currentShader.bind();
+		for (RenderBatch batch : batches)
 			batch.render();
+		currentShader.unbind();
 	}
 
 	private void add(SpriteRenderer sprite) {
@@ -51,6 +57,23 @@ public class Renderer implements Disposable {
 			batches.add(batch);
 			Collections.sort(batches);
 		}
+	}
+
+	public static void bindShader(Shader shader) {
+		currentShader = shader;
+		try {
+			currentShader.addUniform("uProjectionMatrix");
+
+			currentShader.addUniform("uViewMatrix");
+
+			currentShader.addUniform("uTextures");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static Shader getBoundShader() {
+		return currentShader;
 	}
 
 	@Override

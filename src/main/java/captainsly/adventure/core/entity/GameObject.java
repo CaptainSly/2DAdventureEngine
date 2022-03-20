@@ -18,6 +18,7 @@ public class GameObject {
 	private List<Component> components = new ArrayList<>();
 
 	public GameObject() {
+		this.uID = ID_COUNTER++;
 	}
 
 	public GameObject(String objectId) {
@@ -34,6 +35,8 @@ public class GameObject {
 		this.transform = transform;
 		components = new ArrayList<>();
 		this.zIndex = zIndex;
+		
+		this.uID = ID_COUNTER++;
 	}
 
 	public GameObject(String objectId, Transform transform) {

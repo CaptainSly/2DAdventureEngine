@@ -1,4 +1,4 @@
-package captainsly.adventure.core.render;
+package captainsly.adventure.core.render.renderer;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
@@ -20,10 +20,10 @@ import org.joml.Vector2f;
 import org.joml.Vector4f;
 
 import captainsly.adventure.Adventure;
-import captainsly.adventure.core.AssetPool;
 import captainsly.adventure.core.entity.components.SpriteRenderer;
 import captainsly.adventure.core.impl.Disposable;
-import captainsly.adventure.core.render.shaders.ShaderProgram;
+import captainsly.adventure.core.render.Texture;
+import captainsly.adventure.core.render.shaders.Shader;
 
 public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 
@@ -37,13 +37,15 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 	private final int COLOR_SIZE = 4;
 	private final int UV_COORDS_SIZE = 2;
 	private final int TEX_ID_SIZE = 1;
+	private final int ENTITY_ID_SIZE = 1;
 
 	private final int POS_OFFSET = 0;
 	private final int COLOR_OFFSET = POS_OFFSET + POS_SIZE * Float.BYTES;
 	private final int UV_COORDS_OFFSET = COLOR_OFFSET + COLOR_SIZE * Float.BYTES;
 	private final int TEX_ID_OFFSET = UV_COORDS_OFFSET + UV_COORDS_SIZE * Float.BYTES;
+	private final int ENTITY_ID_OFFSET = TEX_ID_OFFSET + TEX_ID_SIZE * Float.BYTES;
 
-	private final int VERTEX_SIZE = 9;
+	private final int VERTEX_SIZE = 10;
 	private final int VERTEX_SIZE_BYTES = VERTEX_SIZE * Float.BYTES;
 
 	private SpriteRenderer[] sprites;
@@ -56,19 +58,8 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 
 	private int vaoId, vboId;
 	private int maxBatchSize;
-	private ShaderProgram shader;
 
 	public RenderBatch(int maxBatchSize, int zIndex) {
-		// Create Shader
-		shader = AssetPool.getShader("defaultShader");
-		try {
-			shader.addUniform("uProjectionMatrix");
-			shader.addUniform("uViewMatrix");
-			shader.addUniform("uTextures");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 		sprites = new SpriteRenderer[maxBatchSize];
 		this.maxBatchSize = maxBatchSize;
 		this.zIndex = zIndex;
@@ -109,6 +100,9 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 
 		glVertexAttribPointer(3, TEX_ID_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, TEX_ID_OFFSET);
 		glEnableVertexAttribArray(3);
+		
+		glVertexAttribPointer(4, ENTITY_ID_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, ENTITY_ID_OFFSET);
+		glEnableVertexAttribArray(4);
 
 	}
 
@@ -123,14 +117,15 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 				rebufferData = true;
 			}
 		}
-		
+
 		if (rebufferData) {
 			// For now, rebuffer all data every frame
 			glBindBuffer(GL_ARRAY_BUFFER, vboId);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
 		}
-		
+
 		// Bind Shader and Set Uniforms
+		Shader shader = Renderer.getBoundShader();
 		shader.bind();
 		shader.setUniform("uProjectionMatrix", Adventure.currentScene.getSceneCamera().getProjectionMatrix());
 		shader.setUniform("uViewMatrix", Adventure.currentScene.getSceneCamera().getViewMatrix());
@@ -190,7 +185,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 		int texId = 0;
 		if (sprite.getTexture() != null) {
 			for (int i = 0; i < batchTextures.size(); i++) {
-				if (batchTextures.get(i) == sprite.getTexture()) {
+				if (batchTextures.get(i).equals(sprite.getTexture())) {
 					texId = i + 1;
 					break;
 				}
@@ -226,6 +221,9 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 
 			// Texture Id
 			vertices[offset + 8] = texId;
+			
+			// Entity Id
+			vertices[offset + 9] = sprite.gameObject.getuID() + 1;
 
 			offset += VERTEX_SIZE;
 		}
@@ -266,7 +264,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 	public boolean hasTexture(Texture texture) {
 		return batchTextures.contains(texture);
 	}
-	
+
 	public int getZIndex() {
 		return zIndex;
 	}

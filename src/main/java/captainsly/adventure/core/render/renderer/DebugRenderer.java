@@ -1,4 +1,4 @@
-package captainsly.adventure.core.render;
+package captainsly.adventure.core.render.renderer;
 
 import static org.lwjgl.opengl.GL11.GL_FLOAT;
 import static org.lwjgl.opengl.GL11.GL_LINES;
@@ -20,16 +20,17 @@ import org.joml.Vector3f;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.AssetPool;
-import captainsly.adventure.core.render.shaders.ShaderProgram;
+import captainsly.adventure.core.render.Line2D;
+import captainsly.adventure.core.render.shaders.Shader;
 
 public class DebugRenderer {
 
-	private static int MAX_LINES = 1000;
+	private static int MAX_LINES = 500;
 
 	private static List<Line2D> lines = new ArrayList<>();
 	// 6 floats per vertex, 3 pos, 3 color. 2 vertices per line
 	private static float[] vertexArray = new float[MAX_LINES * 6 * 2];
-	private static ShaderProgram shader = AssetPool.getShader("debugShader");
+	private static Shader shader = AssetPool.getShader("debugShader");
 
 	private static int vaoId, vboId;
 
@@ -123,7 +124,9 @@ public class DebugRenderer {
 		shader.unbind();
 	}
 
+	// ==========
 	// Add Line2D
+	// ==========
 	public static void addLine2D(Vector2f from, Vector2f to) {
 		addLine2D(from, to, new Vector3f(0, 1, 0), 1);
 	}
@@ -138,5 +141,32 @@ public class DebugRenderer {
 
 		DebugRenderer.lines.add(new Line2D(from, to, color, lifeTime));
 	}
+
+	// =========
+	// Add Box2D
+	// =========
+	public static void addBox2D(Vector2f center, Vector2f dimensions) {
+		// TODO: ADD CONSTANTS FOR COMMON COLORS
+		addBox2D(center, dimensions, new Vector3f(0, 1, 0), 1);
+	}
+
+	public static void addBox2D(Vector2f center, Vector2f dimensions, Vector3f color) {
+		addBox2D(center, dimensions, color, 1);
+	}
+
+	public static void addBox2D(Vector2f center, Vector2f dimensions, Vector3f color, int lifetime) {
+		Vector2f min = new Vector2f(center).sub(new Vector2f(dimensions).mul(0.5f));
+		Vector2f max = new Vector2f(center).add(new Vector2f(dimensions).mul(0.5f));
+
+		Vector2f[] vertices = { new Vector2f(min.x, min.y), new Vector2f(min.x, max.y), new Vector2f(max.x, max.y),
+				new Vector2f(max.x, min.y) };
+
+		addLine2D(vertices[0], vertices[1], color, lifetime);
+		addLine2D(vertices[0], vertices[3], color, lifetime);
+		addLine2D(vertices[1], vertices[2], color, lifetime);
+		addLine2D(vertices[2], vertices[3], color, lifetime);
+	}
+	
+	
 
 }

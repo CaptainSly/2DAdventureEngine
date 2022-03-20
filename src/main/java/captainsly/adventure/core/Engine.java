@@ -26,8 +26,12 @@ import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.input.ControllerListener;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
-import captainsly.adventure.core.render.DebugRenderer;
+import captainsly.adventure.core.render.PickingTexture;
 import captainsly.adventure.core.render.Window;
+import captainsly.adventure.core.render.renderer.DebugRenderer;
+import captainsly.adventure.core.render.renderer.Framebuffer;
+import captainsly.adventure.core.render.renderer.Renderer;
+import captainsly.adventure.core.render.shaders.Shader;
 import captainsly.adventure.core.scenes.Scene;
 import captainsly.adventure.core.scripting.AdventureScriptEngine;
 import captainsly.adventure.core.typeadapters.ComponentTypeAdapter;
@@ -42,6 +46,10 @@ public class Engine implements Disposable {
 	private Scene currentScene;
 	private AdventureScriptEngine adventureScript;
 	private ImGuiLayer guiLayer;
+	private Renderer renderer;
+
+	private Framebuffer frameBuffer;
+	private PickingTexture pickingTexture;
 	private boolean isRunning;
 
 	private int engineFps;
@@ -104,6 +112,7 @@ public class Engine implements Disposable {
 		glfwSetFramebufferSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
 			this.window.setWindowWidth(windowWidth);
 			this.window.setWindowHeight(windowHeight);
+			this.window.setIsResized(true);
 		});
 
 		// Get the thread stack and push a new frame
@@ -116,6 +125,9 @@ public class Engine implements Disposable {
 
 			// Get the resolution of the primary monitor
 			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+			window.setMonitorWidth(vidmode.width());
+			window.setMonitorHeight(vidmode.height());
 
 			// Center the window
 			glfwSetWindowPos(window.getWindowPointer(), (vidmode.width() - pWidth.get(0)) / 2,
@@ -133,6 +145,16 @@ public class Engine implements Disposable {
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		guiLayer = new ImGuiLayer(window.getWindowPointer());
+
+		renderer = new Renderer();
+
+		frameBuffer = new Framebuffer(window.getMonitorWidth(), window.getMonitorHeight());
+		pickingTexture = new PickingTexture(window.getMonitorWidth(), window.getMonitorHeight());
+		glViewport(0, 0, window.getMonitorWidth(), window.getMonitorHeight());
+
+		// ==========================
+		// Engine Version Information
+		// ==========================
 
 		String[] versions = { "LWJGL Version: " + Version.getVersion(), "OpenGL Version: " + Utils.getOpenGLVersion(),
 				"JRuby Version: " + Constants.VERSION + " | Ruby Version: " + Constants.RUBY_VERSION,
@@ -155,9 +177,13 @@ public class Engine implements Disposable {
 		double lastTime = glfwGetTime();
 		double unprocessedTime = 0;
 
-		double frameTime = 1.0 / 60;
+		double frameTime = 1.0 / 300;
 
 		currentScene.onStart();
+
+		// Create Default Shaders
+		Shader defaultShader = AssetPool.getShader("defaultShader");
+		Shader pickingShader = AssetPool.getShader("pickingShader");
 
 		while (isRunning) {
 			boolean render = false;
@@ -171,15 +197,13 @@ public class Engine implements Disposable {
 				unprocessedTime -= frameTime;
 
 				glfwPollEvents();
-				DebugRenderer.beginFrame();
-				
+
 				if (glfwWindowShouldClose(window.getWindowPointer()))
 					isRunning = false;
 
 				if (KeyListener.isKeyDown(GLFW_KEY_ESCAPE))
 					glfwSetWindowShouldClose(window.getWindowPointer(), true);
 
-				
 				MouseListener.update();
 				currentScene.onInput(frameTime);
 				currentScene.update(frameTime);
@@ -193,11 +217,39 @@ public class Engine implements Disposable {
 			}
 
 			if (render) {
-				render(1, 1, 1);
 
-				DebugRenderer.draw();
-				
-				currentScene.render(frameTime);
+				// Render Pass 1 - Render to Picking Texture
+				glDisable(GL_BLEND);
+				pickingTexture.enableWriting();
+				{
+					glViewport(0, 0, window.getMonitorWidth(), window.getMonitorHeight());
+					glClearColor(0, 0, 0, 0);
+					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+					Renderer.bindShader(pickingShader);
+					currentScene.render(frameTime);
+
+					if (MouseListener.isButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+						int x = (int) MouseListener.getMouseScreenPosition().x;
+						int y = (int) MouseListener.getMouseScreenPosition().y;
+
+						Adventure.log.debug("entityId: " + pickingTexture.readPixel(x, y));
+					}
+
+				}
+				pickingTexture.disableWriting();
+				glEnable(GL_BLEND);
+
+				// Render Pass 2 - Render Game
+				DebugRenderer.beginFrame();
+				frameBuffer.bind();
+				{
+					render(1, 1, 1);
+					DebugRenderer.draw();
+					Renderer.bindShader(defaultShader);
+					currentScene.render(frameTime);
+				}
+				frameBuffer.unbind();
+
 				guiLayer.render((float) frameTime, currentScene);
 
 				glfwSwapBuffers(window.getWindowPointer());
@@ -248,6 +300,14 @@ public class Engine implements Disposable {
 
 	public Scene getCurrentScene() {
 		return currentScene;
+	}
+
+	public Framebuffer getEngineFramebuffer() {
+		return frameBuffer;
+	}
+
+	public Renderer getEngineRenderer() {
+		return renderer;
 	}
 
 	public boolean isEngineRunning() {

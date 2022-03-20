@@ -22,7 +22,7 @@ public class OrthographicCamera {
 
 	private void adjustProjection() {
 		projectionMatrix.identity();
-		projectionMatrix.ortho(0.0f, projectionSize.x, 0.0f, projectionSize.y , 0.0f, 100.0f);
+		projectionMatrix.ortho(0.0f, projectionSize.x, 0.0f, projectionSize.y, 0.0f, 100.0f);
 		projectionMatrix.invert(inverseProjectionMatrix);
 	}
 

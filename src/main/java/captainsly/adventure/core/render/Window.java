@@ -11,20 +11,21 @@ public class Window {
 
 	private String windowTitle;
 	private int windowWidth, windowHeight;
+	private int monitorWidth, monitorHeight;
 	private IntBuffer windowWidthBuffer, windowHeightBuffer;
 	private boolean isResized = false;
 	private final long windowPointer;
 
 	public Window(String windowTitle, int windowWidth, int windowHeight) {
+
+		// Create Window
 		windowWidthBuffer = BufferUtils.createIntBuffer(1);
 		windowHeightBuffer = BufferUtils.createIntBuffer(1);
-		
-		this.windowWidth = windowWidth;
-		this.windowHeight = windowHeight;
 
 		glfwDefaultWindowHints();
 		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
 
 		windowPointer = glfwCreateWindow(windowWidth, windowHeight, windowTitle, MemoryUtil.NULL, MemoryUtil.NULL);
 
@@ -32,6 +33,9 @@ public class Window {
 
 		if (windowPointer == MemoryUtil.NULL)
 			throw new RuntimeException("Failed to create GLFW Window");
+
+		this.windowWidth = windowWidthBuffer.get(0);
+		this.windowHeight = windowHeightBuffer.get(0);
 
 	}
 
@@ -48,12 +52,12 @@ public class Window {
 		return windowWidth;
 	}
 
-	public void setWindowWidth(int windowWidth) {
-		this.windowWidth = windowWidth;
-	}
-
 	public int getWindowHeight() {
 		return windowHeight;
+	}
+
+	public float getAspectRatio() {
+		return 16.0f / 9.0f;
 	}
 
 	public IntBuffer getWindowWidthBuffer() {
@@ -68,16 +72,36 @@ public class Window {
 		return isResized;
 	}
 
+	public long getWindowPointer() {
+		return windowPointer;
+	}
+
 	public void setIsResized(boolean isResized) {
 		this.isResized = isResized;
 	}
 
-	public void setWindowHeight(int windowHeight) {
-		this.windowHeight = windowHeight;
+	public int getMonitorWidth() {
+		return monitorWidth;
 	}
 
-	public long getWindowPointer() {
-		return windowPointer;
+	public int getMonitorHeight() {
+		return monitorHeight;
+	}
+
+	public void setMonitorWidth(int monitorWidth) {
+		this.monitorWidth = monitorWidth;
+	}
+
+	public void setMonitorHeight(int monitorHeight) {
+		this.monitorHeight = monitorHeight;
+	}
+
+	public void setWindowWidth(int windowWidth) {
+		this.windowWidth = windowWidth;
+	}
+
+	public void setWindowHeight(int windowHeight) {
+		this.windowHeight = windowHeight;
 	}
 
 }

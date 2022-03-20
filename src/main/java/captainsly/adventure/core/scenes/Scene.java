@@ -9,15 +9,15 @@ import captainsly.adventure.Adventure;
 import captainsly.adventure.core.entity.GameObject;
 import captainsly.adventure.core.entity.OrthographicCamera;
 import captainsly.adventure.core.impl.Disposable;
-import captainsly.adventure.core.render.Renderer;
+import captainsly.adventure.core.render.renderer.Renderer;
 import imgui.ImGui;
 
 public abstract class Scene implements Disposable {
 
 	private List<GameObject> gameObjects;
 	protected OrthographicCamera camera;
-	protected Renderer renderer;
 	protected GameObject activeGameObject = null;
+	protected Renderer renderer;
 
 	public Scene() {
 		gameObjects = new ArrayList<>();
@@ -47,7 +47,6 @@ public abstract class Scene implements Disposable {
 	}
 
 	public void render(double frameTime) {
-
 		renderer.render();
 		onRender(frameTime);
 	}
@@ -72,6 +71,10 @@ public abstract class Scene implements Disposable {
 	public OrthographicCamera getSceneCamera() {
 		return camera;
 	}
+	
+	public Renderer getRenderer() {
+		return renderer;
+	}
 
 	public abstract void onInitialization();
 
@@ -80,9 +83,5 @@ public abstract class Scene implements Disposable {
 	public abstract void onInput(double delta);
 
 	public abstract void onUpdate(double delta);
-
-	public void onDispose() {
-		renderer.onDispose();
-	}
 
 }

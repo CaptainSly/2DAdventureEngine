@@ -39,6 +39,7 @@ public class MouseControlComponent extends Component {
 			holdingObject.getObjectTransform().position.y = (int) (holdingObject.getObjectTransform().position.y / Settings.GRID_SIZE) * Settings.GRID_SIZE;
 			
 			if (MouseListener.isButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+				Adventure.log.debug("Placing held object");
 				placeObject();
 			}
 		}

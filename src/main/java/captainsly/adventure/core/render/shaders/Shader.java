@@ -15,14 +15,14 @@ import captainsly.adventure.Adventure;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.utils.Utils;
 
-public class ShaderProgram implements Disposable {
+public class Shader implements Disposable {
 
 	private final int shaderProgramId;
 	private final int vShaderId, fShaderId;
 
 	private Map<String, Integer> uniformMap;
 
-	public ShaderProgram(String vShader, String fShader) throws Exception {
+	public Shader(String vShader, String fShader) throws Exception {
 		shaderProgramId = glCreateProgram();
 		uniformMap = new HashMap<>();
 

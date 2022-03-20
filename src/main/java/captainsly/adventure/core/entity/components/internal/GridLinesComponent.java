@@ -5,7 +5,7 @@ import org.joml.Vector3f;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.entity.components.Component;
-import captainsly.adventure.core.render.DebugRenderer;
+import captainsly.adventure.core.render.renderer.DebugRenderer;
 import captainsly.adventure.utils.Settings;
 
 /**
@@ -29,7 +29,7 @@ public class GridLinesComponent extends Component {
 		int width = (int) projectionSize.x + Settings.GRID_SIZE * 2;
 		int height = (int) projectionSize.y + Settings.GRID_SIZE * 2;
 
-		int firstX = ((int) (cameraPos.x * Settings.GRID_SIZE) - 1) * Settings.GRID_SIZE;
+		int firstX = ((int) (cameraPos.x / Settings.GRID_SIZE) - 1) * Settings.GRID_SIZE;
 		int firstY = ((int) (cameraPos.y / Settings.GRID_SIZE) - 1) * Settings.GRID_SIZE;
 
 		int numVtLines = (int) (projectionSize.x / Settings.GRID_SIZE) + 2;
@@ -42,7 +42,7 @@ public class GridLinesComponent extends Component {
 			int y = firstY + (Settings.GRID_SIZE * i);
 
 			if (i < numVtLines) {
-				DebugRenderer.addLine2D(new Vector2f(x, firstY), new Vector2f(x, y + height), LINE_COLOR);
+				DebugRenderer.addLine2D(new Vector2f(x, firstY), new Vector2f(x, firstY + height), LINE_COLOR);
 			}
 
 			if (i < numHzLines) {

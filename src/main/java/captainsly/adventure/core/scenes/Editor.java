@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.joml.Vector2f;
 
-import captainsly.adventure.Adventure;
 import captainsly.adventure.core.AssetPool;
 import captainsly.adventure.core.Prefab;
+import captainsly.adventure.core.editor.GamePort;
 import captainsly.adventure.core.entity.GameObject;
 import captainsly.adventure.core.entity.Transform;
 import captainsly.adventure.core.entity.components.internal.GridLinesComponent;
@@ -27,24 +27,27 @@ public class Editor extends Scene {
 	public void onInitialization() {
 		levelEditorObject.addComponents(new MouseControlComponent(), new GridLinesComponent());
 
-		spriteSheets.add(new SpriteSheet(AssetPool.getTexture("Door0"), 16, 16));
-		spriteSheets.add(new SpriteSheet(AssetPool.getTexture("Floor"), 16, 16));
-		spriteSheets.add(new SpriteSheet(AssetPool.getTexture("Wall"), 16, 16));
-		spriteSheets.add(new SpriteSheet(AssetPool.getTexture("Decor0"), 16, 16));
+		spriteSheets.add(AssetPool.createSpriteSheet("Door0", 16, 16, 0));
+		spriteSheets.add(AssetPool.createSpriteSheet("Floor", 16, 16, 0));
+		spriteSheets.add(AssetPool.createSpriteSheet("Wall", 16, 16, 0));
+		spriteSheets.add(AssetPool.createSpriteSheet("Decor0", 16, 16, 0));
+
 	}
 
 	@Override
 	public void onGui() {
 
+		GamePort.imgui(); // Draw the Gameport
 		ImGui.begin("Tileset");
-		if (ImGui.button("Add new Tileset")) {
-			// TODO: Implement Adding Tilesets
+		{
+			if (ImGui.button("Add new Tileset")) {
+				// TODO: Implement Adding Tilesets
+			}
+
+			// Get the tilesets in the array and draw them
+			for (SpriteSheet sheet : spriteSheets)
+				createTilesetUi(sheet);
 		}
-
-		// Get the tilesets in the array and draw them
-		for (SpriteSheet sheet : spriteSheets)
-			createTilesetUi(sheet);
-
 		ImGui.end();
 
 	}
@@ -85,7 +88,6 @@ public class Editor extends Scene {
 			ImGui.pushID(i);
 			if (ImGui.imageButton(id, spriteWidth, spriteHeight, uvCoords[2].x, uvCoords[0].y, uvCoords[0].x,
 					uvCoords[2].y)) {
-				Adventure.log.debug("Button " + i + ": clicked");
 				GameObject object = Prefab.generateSpriteObject(sprite, Settings.GRID_SIZE, Settings.GRID_SIZE);
 				levelEditorObject.getComponent(MouseControlComponent.class).pickupObject(object);
 			}
@@ -102,6 +104,10 @@ public class Editor extends Scene {
 			}
 
 		}
+	}
+
+	@Override
+	public void onDispose() {
 	}
 
 }

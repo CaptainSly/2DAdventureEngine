@@ -5,21 +5,21 @@ import static org.lwjgl.glfw.GLFW.*;
 import org.joml.Vector2d;
 
 import captainsly.adventure.Adventure;
+import captainsly.adventure.core.editor.GamePort;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
 import captainsly.adventure.core.scenes.Scene;
+import captainsly.adventure.utils.Utils;
 import imgui.ImFontAtlas;
 import imgui.ImFontConfig;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
-import imgui.flag.ImGuiBackendFlags;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiKey;
-import imgui.flag.ImGuiMouseCursor;
+import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
+import imgui.type.ImBoolean;
 
 public class ImGuiLayer implements Disposable {
 
@@ -42,8 +42,9 @@ public class ImGuiLayer implements Disposable {
 		// Initialize ImGuiIO config
 		final ImGuiIO io = ImGui.getIO();
 
-		io.setIniFilename(null);
-		io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.NavEnableGamepad); // Navigation with keyboard
+		io.setIniFilename(Utils.ENGINE_WORKING_DIRECTORY + "config/imGui.ini");
+		io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.NavEnableGamepad
+				| ImGuiConfigFlags.DockingEnable); // Navigation with keyboard
 		io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Mouse cursors to display while resizing windows etc.
 		io.setBackendPlatformName("imgui_java_impl_glfw");
 
@@ -101,8 +102,7 @@ public class ImGuiLayer implements Disposable {
 			io.setKeyShift(io.getKeysDown(GLFW_KEY_LEFT_SHIFT) || io.getKeysDown(GLFW_KEY_RIGHT_SHIFT));
 			io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
 			io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
-			
-			
+
 			if (!io.getWantCaptureKeyboard())
 				KeyListener.keyCallback(w, key, scancode, action, mods);
 
@@ -128,8 +128,8 @@ public class ImGuiLayer implements Disposable {
 			if (!io.getWantCaptureMouse() && mouseDown[1]) {
 				ImGui.setWindowFocus(null);
 			}
-			
-			if (!io.getWantCaptureMouse())
+
+			if (!io.getWantCaptureMouse() || GamePort.doesWantMouseCapture())
 				MouseListener.mouseButtonCallback(w, button, action, mods);
 		});
 
@@ -183,7 +183,11 @@ public class ImGuiLayer implements Disposable {
 		startFrame(dt);
 
 		ImGui.newFrame();
-		scene.onSceneImGui();
+		{
+			setupDockspace();
+			scene.onSceneImGui();
+			ImGui.end(); // Ends the dockspace
+		}
 		ImGui.render();
 
 		endFrame();
@@ -209,6 +213,24 @@ public class ImGuiLayer implements Disposable {
 		// After Dear ImGui prepared a draw data, we use it in the LWJGL3 renderer.
 		// At that moment ImGui will be rendered to the current OpenGL context.
 		imGuiGl3.renderDrawData(ImGui.getDrawData());
+	}
+
+	private void setupDockspace() {
+		int windowFlags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking;
+
+		ImGui.setNextWindowPos(0.0f, 0.0f, ImGuiCond.Always);
+		ImGui.setNextWindowSize(Adventure.window.getWindowWidth(), Adventure.window.getWindowHeight());
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowRounding, 0.0f);
+		ImGui.pushStyleVar(ImGuiStyleVar.WindowBorderSize, 0.0f);
+
+		windowFlags |= ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize
+				| ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
+
+		ImGui.begin("Dockspace Parent", new ImBoolean(true), windowFlags);
+		ImGui.popStyleVar(2);
+
+		// Dockspace
+		ImGui.dockSpace(ImGui.getID("Dockspace"));
 	}
 
 	@Override
