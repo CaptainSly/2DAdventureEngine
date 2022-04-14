@@ -5,13 +5,16 @@ import java.util.List;
 
 import org.joml.Vector2f;
 
+import captainsly.adventure.Adventure;
 import captainsly.adventure.core.AssetPool;
 import captainsly.adventure.core.Prefab;
-import captainsly.adventure.core.editor.GamePort;
+import captainsly.adventure.core.SaveManager;
 import captainsly.adventure.core.entity.GameObject;
 import captainsly.adventure.core.entity.Transform;
+import captainsly.adventure.core.entity.components.internal.EditorCameraComponent;
 import captainsly.adventure.core.entity.components.internal.GridLinesComponent;
 import captainsly.adventure.core.entity.components.internal.MouseControlComponent;
+import captainsly.adventure.core.entity.components.internal.gizmos.TranslateGizmo;
 import captainsly.adventure.core.render.sprite.Sprite;
 import captainsly.adventure.core.render.sprite.SpriteSheet;
 import captainsly.adventure.utils.Settings;
@@ -25,23 +28,41 @@ public class Editor extends Scene {
 
 	@Override
 	public void onInitialization() {
-		levelEditorObject.addComponents(new MouseControlComponent(), new GridLinesComponent());
+		spriteSheets.add(AssetPool.createSpriteSheet("terrain", 16, 16, 0));
 
-		spriteSheets.add(AssetPool.createSpriteSheet("Door0", 16, 16, 0));
-		spriteSheets.add(AssetPool.createSpriteSheet("Floor", 16, 16, 0));
-		spriteSheets.add(AssetPool.createSpriteSheet("Wall", 16, 16, 0));
-		spriteSheets.add(AssetPool.createSpriteSheet("Decor0", 16, 16, 0));
+		SpriteSheet spriteSheet = AssetPool.createSpriteSheet("gizmos", 2, 24, 48, 0);
+		Sprite gizmoSprite = spriteSheet.getSprite(1);
 
+		levelEditorObject.addComponents(new MouseControlComponent(), new GridLinesComponent(),
+				new EditorCameraComponent(camera),
+				new TranslateGizmo(gizmoSprite, Adventure.guiLayer.getPropertiesWindow()));
+
+		levelEditorObject.setNoSerialize();
+		levelEditorObject.start();
 	}
 
 	@Override
 	public void onGui() {
+		ImGui.begin("Level Editor");
+		levelEditorObject.imgui();
+		ImGui.end();
 
-		GamePort.imgui(); // Draw the Gameport
 		ImGui.begin("Tileset");
 		{
-			if (ImGui.button("Add new Tileset")) {
-				// TODO: Implement Adding Tilesets
+
+			ImGui.text("FPS: " + Adventure.engine.getEngineFPS());
+			// Map Save/Load System TODO: Clean and Polish
+			if (ImGui.button("Save Map")) {
+				SaveManager.saveMap("test", getGameObjects());
+			}
+
+			if (ImGui.button("Load Map")) {
+				SaveManager.load("test");
+			}
+
+			// TODO: Implement TileMap Brush System
+			if (ImGui.button("Paint")) {
+				System.out.println("Regular Brush");
 			}
 
 			// Get the tilesets in the array and draw them

@@ -10,72 +10,76 @@ import imgui.flag.ImGuiWindowFlags;
 
 public class GamePort {
 
-	private static float leftX, rightX, topY, bottomY;
-	
-	public static void imgui() {
-		ImGui.begin("GamePort", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
-		{
-			ImVec2 windowSize = getLargestSizeForViewport();
-			ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
+    private static float leftX, rightX, topY, bottomY;
 
-			ImGui.setCursorPos(windowPos.x, windowPos.y);
+    public void imgui() {
+        ImGui.begin("GamePort", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
+        {
+            createGameport();
 
-			ImVec2 topLeft = new ImVec2();
-			ImGui.getCursorScreenPos(topLeft);
-			topLeft.x -= ImGui.getScrollX();
-			topLeft.y -= ImGui.getScrollY();
+        }
+        ImGui.end();
+    }
 
-			leftX = topLeft.x;
-			bottomY = topLeft.y;
-			rightX = topLeft.x + windowSize.x;
-			topY = topLeft.y + windowSize.y;
+    private void createGameport() {
+        ImVec2 windowSize = getLargestSizeForViewport();
+        ImVec2 windowPos = getCenteredPositionForViewport(windowSize);
 
-			int textureId = Adventure.engine.getEngineFramebuffer().getTextureId();
-			ImGui.image(textureId, windowSize.x, windowSize.y, 0, 1, 1, 0);
+        ImGui.setCursorPos(windowPos.x, windowPos.y);
 
-			MouseListener.setGameViewportPos(new Vector2f(topLeft.x, topLeft.y));
-			MouseListener.setGameViewportSize(new Vector2f(windowSize.x, windowSize.y));
-		}
-		ImGui.end();
-	}
+        ImVec2 topLeft = new ImVec2();
+        ImGui.getCursorScreenPos(topLeft);
+        topLeft.x -= ImGui.getScrollX();
+        topLeft.y -= ImGui.getScrollY();
 
-	private static ImVec2 getLargestSizeForViewport() {
-		ImVec2 windowSize = new ImVec2();
+        leftX = topLeft.x;
+        bottomY = topLeft.y;
+        rightX = topLeft.x + windowSize.x;
+        topY = topLeft.y + windowSize.y;
 
-		ImGui.getContentRegionAvail(windowSize);
-		windowSize.x -= ImGui.getScrollX();
-		windowSize.y -= ImGui.getScrollY();
+        int textureId = Adventure.engine.getEngineFramebuffer().getTextureId();
+        ImGui.image(textureId, windowSize.x, windowSize.y, 0, 1, 1, 0);
 
-		float aspectWidth = windowSize.x;
-		float aspectHeight = aspectWidth / Adventure.window.getAspectRatio();
+        MouseListener.setGameViewportPos(new Vector2f(topLeft.x, topLeft.y));
+        MouseListener.setGameViewportSize(new Vector2f(windowSize.x, windowSize.y));
+    }
 
-		if (aspectHeight > windowSize.y) {
-			// We must switch to pillarbox mode
-			aspectHeight = windowSize.y;
-			aspectWidth = aspectHeight * Adventure.window.getAspectRatio();
-		}
+    private ImVec2 getLargestSizeForViewport() {
+        ImVec2 windowSize = new ImVec2();
 
-		return new ImVec2(aspectWidth, aspectHeight);
-	}
+        ImGui.getContentRegionAvail(windowSize);
+        windowSize.x -= ImGui.getScrollX();
+        windowSize.y -= ImGui.getScrollY();
 
-	private static ImVec2 getCenteredPositionForViewport(ImVec2 aspectSize) {
-		ImVec2 windowSize = new ImVec2();
+        float aspectWidth = windowSize.x;
+        float aspectHeight = aspectWidth / Adventure.window.getAspectRatio();
 
-		ImGui.getContentRegionAvail(windowSize);
-		windowSize.x -= ImGui.getScrollX();
-		windowSize.y -= ImGui.getScrollY();
+        if (aspectHeight > windowSize.y) {
+            // We must switch to pillarbox mode
+            aspectHeight = windowSize.y;
+            aspectWidth = aspectHeight * Adventure.window.getAspectRatio();
+        }
 
-		float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
-		float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
+        return new ImVec2(aspectWidth, aspectHeight);
+    }
 
-		return new ImVec2(viewportX + ImGui.getCursorPosX(), viewportY + ImGui.getCursorPosY());
-	}
+    private ImVec2 getCenteredPositionForViewport(ImVec2 aspectSize) {
+        ImVec2 windowSize = new ImVec2();
 
-	public static boolean doesWantMouseCapture() {
-		Adventure.log.debug("Capture");
-		return MouseListener.getMousePosition().x >= leftX && MouseListener.getMousePosition().x <= rightX
-				&& MouseListener.getMousePosition().y >= bottomY && MouseListener.getMousePosition().y <= topY;
+        ImGui.getContentRegionAvail(windowSize);
+        windowSize.x -= ImGui.getScrollX();
+        windowSize.y -= ImGui.getScrollY();
 
-	}
+        float viewportX = (windowSize.x / 2.0f) - (aspectSize.x / 2.0f);
+        float viewportY = (windowSize.y / 2.0f) - (aspectSize.y / 2.0f);
+
+        return new ImVec2(viewportX + ImGui.getCursorPosX(), viewportY + ImGui.getCursorPosY());
+    }
+
+    public boolean doesWantCapture() {
+        return MouseListener.getX() >= leftX && MouseListener.getX() <= rightX && MouseListener.getY() >= bottomY
+                && MouseListener.getY() <= topY;
+
+    }
 
 }

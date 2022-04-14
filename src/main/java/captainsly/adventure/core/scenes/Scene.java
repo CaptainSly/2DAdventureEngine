@@ -2,31 +2,34 @@ package captainsly.adventure.core.scenes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.joml.Vector2f;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.entity.GameObject;
-import captainsly.adventure.core.entity.OrthographicCamera;
+import captainsly.adventure.core.entity.Camera;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.render.renderer.Renderer;
-import imgui.ImGui;
 
 public abstract class Scene implements Disposable {
 
 	private List<GameObject> gameObjects;
-	protected OrthographicCamera camera;
-	protected GameObject activeGameObject = null;
+	protected Camera camera;
 	protected Renderer renderer;
 
 	public Scene() {
 		gameObjects = new ArrayList<>();
-		camera = new OrthographicCamera(new Vector2f());
+		camera = new Camera(new Vector2f());
 		renderer = new Renderer();
 	}
 
 	public void onStart() {
 		onInitialization();
+		for (GameObject gObj : gameObjects) {
+			gObj.start();
+			renderer.addGameObject(gObj);
+		}
 	}
 
 	public void addGameObjectToScene(GameObject obj) {
@@ -40,10 +43,12 @@ public abstract class Scene implements Disposable {
 	}
 
 	public void update(double frameTime) {
-		onUpdate(frameTime);
+		camera.adjustProjection();
+		
 		for (GameObject gObj : getGameObjects())
 			gObj.update(frameTime);
 
+		onUpdate(frameTime);
 	}
 
 	public void render(double frameTime) {
@@ -51,27 +56,26 @@ public abstract class Scene implements Disposable {
 		onRender(frameTime);
 	}
 
-	public void onGui() {
-	}
+	
 
 	public void onSceneImGui() {
-		if (this.activeGameObject != null) {
-			ImGui.begin("Inspector");
-			this.activeGameObject.imgui();
-			ImGui.end();
-		}
-
 		onGui();
+	}
+
+	public GameObject getGameObject(int uId) {
+		Optional<GameObject> result = this.gameObjects.stream().filter(gObj -> gObj.getuID() == uId).findFirst();
+		
+		return result.orElse(null);
 	}
 
 	public List<GameObject> getGameObjects() {
 		return gameObjects;
 	}
 
-	public OrthographicCamera getSceneCamera() {
+	public Camera getSceneCamera() {
 		return camera;
 	}
-	
+
 	public Renderer getRenderer() {
 		return renderer;
 	}
@@ -83,5 +87,7 @@ public abstract class Scene implements Disposable {
 	public abstract void onInput(double delta);
 
 	public abstract void onUpdate(double delta);
-
+	
+	public abstract void onGui(); 
+	
 }

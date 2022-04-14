@@ -4,6 +4,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import captainsly.adventure.Adventure;
+import captainsly.adventure.core.entity.Camera;
 import captainsly.adventure.core.entity.components.Component;
 import captainsly.adventure.core.render.renderer.DebugRenderer;
 import captainsly.adventure.utils.Settings;
@@ -18,23 +19,22 @@ public class GridLinesComponent extends Component {
 	private Vector3f LINE_COLOR = new Vector3f(0.2f, 0.2f, 0.2f);
 
 	@Override
-	public void start() {
-	}
-
-	@Override
 	public void update(double delta) {
-		Vector2f cameraPos = Adventure.currentScene.getSceneCamera().cameraPosition;
-		Vector2f projectionSize = Adventure.currentScene.getSceneCamera().getProjectionSize();
+		Camera camera = Adventure.getSceneCamera();
+		Vector2f cameraPos = camera.cameraPosition;
+		Vector2f projectionSize = camera.getProjectionSize();
 
-		int width = (int) projectionSize.x + Settings.GRID_SIZE * 2;
-		int height = (int) projectionSize.y + Settings.GRID_SIZE * 2;
-
+		
 		int firstX = ((int) (cameraPos.x / Settings.GRID_SIZE) - 1) * Settings.GRID_SIZE;
 		int firstY = ((int) (cameraPos.y / Settings.GRID_SIZE) - 1) * Settings.GRID_SIZE;
 
-		int numVtLines = (int) (projectionSize.x / Settings.GRID_SIZE) + 2;
-		int numHzLines = (int) (projectionSize.y / Settings.GRID_SIZE) + 2;
+		int numVtLines = (int) (projectionSize.x * camera.getZoom() / Settings.GRID_SIZE) + 2;
+		int numHzLines = (int) (projectionSize.y * camera.getZoom() / Settings.GRID_SIZE) + 2;
 
+		int height = (int) (projectionSize.y * camera.getZoom()) + Settings.GRID_SIZE * 2;
+		int width = (int) (projectionSize.x * camera.getZoom()) + Settings.GRID_SIZE * 2;
+
+		
 		int maxLines = Math.max(numVtLines, numHzLines);
 		for (int i = 0; i < maxLines; i++) {
 

@@ -34,17 +34,26 @@ public class AssetPool {
 		}
 	}
 
-	public static SpriteSheet createSpriteSheet(String spriteSheetResourceName, int spriteWidth, int spriteHeight, int padding) {
+	public static SpriteSheet createSpriteSheet(String spriteSheetResourceName, int spriteWidth, int spriteHeight,
+			int padding) {
 		SpriteSheet newSheet = new SpriteSheet(getTexture(spriteSheetResourceName), spriteWidth, spriteHeight, padding);
 		spriteSheetsMap.put(spriteSheetResourceName, newSheet);
-		
+
+		return spriteSheetsMap.get(spriteSheetResourceName);
+	}
+
+	public static SpriteSheet createSpriteSheet(String spriteSheetResourceName, int numSprites, int spriteWidth, int spriteHeight,
+			int padding) {
+		SpriteSheet newSheet = new SpriteSheet(getTexture(spriteSheetResourceName), numSprites, spriteWidth, spriteHeight, padding);
+		spriteSheetsMap.put(spriteSheetResourceName, newSheet);
+
 		return spriteSheetsMap.get(spriteSheetResourceName);
 	}
 
 	public static SpriteSheet getSpriteSheet(String spriteSheetResourceName) {
 		if (spriteSheetsMap.containsKey(spriteSheetResourceName))
 			return spriteSheetsMap.get(spriteSheetResourceName);
-		
+
 		return null;
 	}
 

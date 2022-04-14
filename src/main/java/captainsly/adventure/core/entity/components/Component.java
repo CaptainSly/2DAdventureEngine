@@ -3,6 +3,7 @@ package captainsly.adventure.core.entity.components;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -48,6 +49,11 @@ public abstract class Component {
 					boolean val = (boolean) value;
 					if (ImGui.checkbox(name + ": ", val))
 						field.set(this, !val);
+				} else if (type == Vector2f.class) {
+					Vector2f val = (Vector2f) value;
+					float[] imVec = { val.x, val.y };
+					if (ImGui.dragFloat2(name + ": ", imVec))
+						val.set(imVec[0], imVec[1]);
 				} else if (type == Vector3f.class) {
 					Vector3f val = (Vector3f) value;
 					float[] imVec = { val.x, val.y, val.z };
@@ -57,7 +63,7 @@ public abstract class Component {
 					Vector4f val = (Vector4f) value;
 					float[] imVec = { val.x, val.y, val.z, val.w };
 					if (ImGui.dragFloat4(name + ": ", imVec))
-						val.set(imVec[0], imVec[1], imVec[2], imVec[4]);
+						val.set(imVec[0], imVec[1], imVec[2], imVec[3]);
 				}
 
 				if (isPrivate)
@@ -68,24 +74,24 @@ public abstract class Component {
 			}
 		}
 	}
-	
+
 	public void generateId() {
 		if (uID == -1) {
 			this.uID = ID_COUNTER++;
 		}
 	}
-	
 
-	public abstract void start();
+	public void start() {
+	}
 
 	public abstract void update(double delta);
 
 	public static void init(int maxId) {
 		ID_COUNTER = maxId;
 	}
-	
+
 	public int getuID() {
 		return uID;
 	}
-	
+
 }

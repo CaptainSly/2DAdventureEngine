@@ -115,7 +115,7 @@ public class DebugRenderer {
 		glEnableVertexAttribArray(0);
 		glEnableVertexAttribArray(1);
 
-		glDrawArrays(GL_LINES, 0, lines.size() * 6 * 2);
+		glDrawArrays(GL_LINES, 0, lines.size() * 2);
 
 		glDisableVertexAttribArray(0);
 		glDisableVertexAttribArray(1);
@@ -166,7 +166,5 @@ public class DebugRenderer {
 		addLine2D(vertices[1], vertices[2], color, lifetime);
 		addLine2D(vertices[2], vertices[3], color, lifetime);
 	}
-	
-	
 
 }

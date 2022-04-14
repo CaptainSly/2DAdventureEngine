@@ -42,7 +42,7 @@ public class PickingTexture {
 		// Disable Reading
 		glReadBuffer(GL_NONE);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-				
+
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 			assert false : "Error: Framebuffer is not complete";
 			return false;

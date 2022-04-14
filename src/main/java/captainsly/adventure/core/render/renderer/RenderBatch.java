@@ -16,6 +16,7 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 
@@ -100,7 +101,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 
 		glVertexAttribPointer(3, TEX_ID_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, TEX_ID_OFFSET);
 		glEnableVertexAttribArray(3);
-		
+
 		glVertexAttribPointer(4, ENTITY_ID_SIZE, GL_FLOAT, false, VERTEX_SIZE_BYTES, ENTITY_ID_OFFSET);
 		glEnableVertexAttribArray(4);
 
@@ -192,6 +193,16 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 			}
 		}
 
+		boolean isRotated = sprite.gameObject.getObjectRotation() != 0.0f;
+		Matrix4f transformMatrix = new Matrix4f().identity();
+
+		if (isRotated) {
+			transformMatrix.translate(sprite.gameObject.getObjectPosition().x, sprite.gameObject.getObjectPosition().y,
+					0f);
+			transformMatrix.rotate((float) Math.toRadians(sprite.gameObject.getObjectRotation()), 0, 0, 1);
+			transformMatrix.scale(sprite.gameObject.getObjectScale().x, sprite.gameObject.getObjectScale().y, 1);
+		}
+
 		float xAdd = 1.0f;
 		float yAdd = 1.0f;
 
@@ -203,11 +214,18 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 			else if (i == 3)
 				yAdd = 1.0f;
 
-			// Load Vertices
-			vertices[offset] = sprite.gameObject.getObjectTransform().position.x
-					+ (xAdd * sprite.gameObject.getObjectTransform().scale.x);
-			vertices[offset + 1] = sprite.gameObject.getObjectTransform().position.y
-					+ (yAdd * sprite.gameObject.getObjectTransform().scale.y);
+			Vector4f currentPosition = new Vector4f(
+					sprite.gameObject.getObjectPosition().x + (xAdd * sprite.gameObject.getObjectScale().x),
+					sprite.gameObject.getObjectPosition().y + (yAdd * sprite.gameObject.getObjectScale().y), 0, 1);
+			
+			if (isRotated) {
+				currentPosition = new Vector4f(xAdd, yAdd, 0, 1).mul(transformMatrix);
+			}
+			
+
+			// Load Position
+			vertices[offset] = currentPosition.x;
+			vertices[offset + 1] = currentPosition.y;
 
 			// Load Color
 			vertices[offset + 2] = color.x;
@@ -221,7 +239,7 @@ public class RenderBatch implements Disposable, Comparable<RenderBatch> {
 
 			// Texture Id
 			vertices[offset + 8] = texId;
-			
+
 			// Entity Id
 			vertices[offset + 9] = sprite.gameObject.getuID() + 1;
 

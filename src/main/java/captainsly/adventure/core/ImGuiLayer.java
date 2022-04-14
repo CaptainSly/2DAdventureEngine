@@ -6,9 +6,11 @@ import org.joml.Vector2d;
 
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.editor.GamePort;
+import captainsly.adventure.core.editor.PropertiesWindow;
 import captainsly.adventure.core.impl.Disposable;
 import captainsly.adventure.core.input.KeyListener;
 import captainsly.adventure.core.input.MouseListener;
+import captainsly.adventure.core.render.PickingTexture;
 import captainsly.adventure.core.scenes.Scene;
 import captainsly.adventure.utils.Utils;
 import imgui.ImFontAtlas;
@@ -26,9 +28,13 @@ public class ImGuiLayer implements Disposable {
 	private final long[] mouseCursors = new long[ImGuiMouseCursor.COUNT];
 	private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 	private final long glfwWindowPointer;
+	private GamePort gamePort;
+	private PropertiesWindow propertiesWindow;
 
-	public ImGuiLayer(long glfwWindowPointer) {
+	public ImGuiLayer(long glfwWindowPointer, PickingTexture pickingTexture) {
 		this.glfwWindowPointer = glfwWindowPointer;
+		this.gamePort = new GamePort();
+		this.propertiesWindow = new PropertiesWindow(pickingTexture);
 		initImGui();
 	}
 
@@ -102,9 +108,7 @@ public class ImGuiLayer implements Disposable {
 			io.setKeyShift(io.getKeysDown(GLFW_KEY_LEFT_SHIFT) || io.getKeysDown(GLFW_KEY_RIGHT_SHIFT));
 			io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
 			io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
-
-			if (!io.getWantCaptureKeyboard())
-				KeyListener.keyCallback(w, key, scancode, action, mods);
+			KeyListener.keyCallback(w, key, scancode, action, mods);
 
 		});
 
@@ -125,17 +129,21 @@ public class ImGuiLayer implements Disposable {
 
 			io.setMouseDown(mouseDown);
 
-			if (!io.getWantCaptureMouse() && mouseDown[1]) {
+			if (!gamePort.doesWantCapture() && !io.getWantCaptureMouse() && mouseDown[1]) {
 				ImGui.setWindowFocus(null);
 			}
 
-			if (!io.getWantCaptureMouse() || GamePort.doesWantMouseCapture())
+			if (!io.getWantCaptureMouse() || gamePort.doesWantCapture())
 				MouseListener.mouseButtonCallback(w, button, action, mods);
 		});
 
 		glfwSetScrollCallback(glfwWindowPointer, (w, xOffset, yOffset) -> {
 			io.setMouseWheelH(io.getMouseWheelH() + (float) xOffset);
 			io.setMouseWheel(io.getMouseWheel() + (float) yOffset);
+
+			if (!io.getWantCaptureMouse() || gamePort.doesWantCapture())
+				MouseListener.mouseScrollCallback(w, xOffset, yOffset);
+
 		});
 
 		io.setSetClipboardTextFn(new ImStrConsumer() {
@@ -185,7 +193,12 @@ public class ImGuiLayer implements Disposable {
 		ImGui.newFrame();
 		{
 			setupDockspace();
+
 			scene.onSceneImGui();
+			gamePort.imgui();
+			propertiesWindow.update(dt, scene);
+			propertiesWindow.onImGui();
+
 			ImGui.end(); // Ends the dockspace
 		}
 		ImGui.render();
@@ -194,7 +207,7 @@ public class ImGuiLayer implements Disposable {
 	}
 
 	private void startFrame(final float deltaTime) {
-		Vector2d mousePos = MouseListener.getMousePosition();
+		Vector2d mousePos = new Vector2d(MouseListener.getX(), MouseListener.getY());
 
 		// We SHOULD call those methods to update Dear ImGui state for the current frame
 		final ImGuiIO io = ImGui.getIO();
@@ -233,6 +246,14 @@ public class ImGuiLayer implements Disposable {
 		ImGui.dockSpace(ImGui.getID("Dockspace"));
 	}
 
+	public PropertiesWindow getPropertiesWindow() {
+		return propertiesWindow;
+	}
+
+	public GamePort getGamePort() {
+		return gamePort;
+	}
+	
 	@Override
 	public void onDispose() {
 		imGuiGl3.dispose();

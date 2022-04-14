@@ -72,7 +72,11 @@ public class Engine implements Disposable {
 		if (!(new File(Utils.ENGINE_WORKING_DIRECTORY).exists())) {
 			Utils.createEngineFileStructure();
 
-			String[] paths = new String[] { "scripts", "mods", "config", "logs", "saves", };
+			String[] paths = new String[] { 
+					"data", "data/maps", "data/scripts", "data/audio",
+					"mods", "config", "logs", "saves",
+
+			};
 
 			for (int i = 0; i < paths.length; i++) {
 				File compDir = new File(Utils.ENGINE_WORKING_DIRECTORY + paths[i]);
@@ -99,7 +103,7 @@ public class Engine implements Disposable {
 			throw new IllegalStateException("Unable to initialize GLFW");
 
 		Adventure.log.info("Creating Window");
-		window = new Window("Adventure", 1280, 720);
+		window = new Window("SpireEngine", 1280, 720);
 		Adventure.window = window;
 
 		Adventure.log.info("Setting callbacks");
@@ -109,7 +113,7 @@ public class Engine implements Disposable {
 		glfwSetScrollCallback(window.getWindowPointer(), MouseListener::mouseScrollCallback);
 		glfwSetJoystickCallback(ControllerListener::controllerCallback);
 
-		glfwSetFramebufferSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
+		glfwSetWindowSizeCallback(window.getWindowPointer(), (window, windowWidth, windowHeight) -> {
 			this.window.setWindowWidth(windowWidth);
 			this.window.setWindowHeight(windowHeight);
 			this.window.setIsResized(true);
@@ -144,13 +148,13 @@ public class Engine implements Disposable {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-		guiLayer = new ImGuiLayer(window.getWindowPointer());
-
 		renderer = new Renderer();
 
 		frameBuffer = new Framebuffer(window.getMonitorWidth(), window.getMonitorHeight());
 		pickingTexture = new PickingTexture(window.getMonitorWidth(), window.getMonitorHeight());
 		glViewport(0, 0, window.getMonitorWidth(), window.getMonitorHeight());
+
+		Adventure.guiLayer = guiLayer = new ImGuiLayer(window.getWindowPointer(), pickingTexture);
 
 		// ==========================
 		// Engine Version Information
@@ -176,8 +180,9 @@ public class Engine implements Disposable {
 
 		double lastTime = glfwGetTime();
 		double unprocessedTime = 0;
+		double delta = -1.0f;
 
-		double frameTime = 1.0 / 300;
+		double frameTime = 1.0 / 60;
 
 		currentScene.onStart();
 
@@ -186,17 +191,17 @@ public class Engine implements Disposable {
 		Shader pickingShader = AssetPool.getShader("pickingShader");
 
 		while (isRunning) {
+
+			glfwPollEvents();
 			boolean render = false;
 
 			double startTime = glfwGetTime();
-			double processedTime = startTime - lastTime;
+			delta = startTime - lastTime;
 
 			while (unprocessedTime > frameTime) {
 				render = true;
 
 				unprocessedTime -= frameTime;
-
-				glfwPollEvents();
 
 				if (glfwWindowShouldClose(window.getWindowPointer()))
 					isRunning = false;
@@ -204,9 +209,8 @@ public class Engine implements Disposable {
 				if (KeyListener.isKeyDown(GLFW_KEY_ESCAPE))
 					glfwSetWindowShouldClose(window.getWindowPointer(), true);
 
-				MouseListener.update();
-				currentScene.onInput(frameTime);
-				currentScene.update(frameTime);
+				currentScene.onInput(delta);
+				currentScene.update(delta);
 
 				if (frameCounter >= 1.0) {
 					engineFps = frames;
@@ -226,15 +230,7 @@ public class Engine implements Disposable {
 					glClearColor(0, 0, 0, 0);
 					glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 					Renderer.bindShader(pickingShader);
-					currentScene.render(frameTime);
-
-					if (MouseListener.isButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-						int x = (int) MouseListener.getMouseScreenPosition().x;
-						int y = (int) MouseListener.getMouseScreenPosition().y;
-
-						Adventure.log.debug("entityId: " + pickingTexture.readPixel(x, y));
-					}
-
+					currentScene.render(delta);
 				}
 				pickingTexture.disableWriting();
 				glEnable(GL_BLEND);
@@ -246,13 +242,14 @@ public class Engine implements Disposable {
 					render(1, 1, 1);
 					DebugRenderer.draw();
 					Renderer.bindShader(defaultShader);
-					currentScene.render(frameTime);
+					currentScene.render(delta);
 				}
 				frameBuffer.unbind();
 
-				guiLayer.render((float) frameTime, currentScene);
-
+				guiLayer.render((float) delta, currentScene);
 				glfwSwapBuffers(window.getWindowPointer());
+
+				MouseListener.endFrame();
 				frames++;
 			} else {
 				try {
@@ -264,8 +261,8 @@ public class Engine implements Disposable {
 
 			lastTime = startTime;
 
-			unprocessedTime += processedTime;
-			frameCounter += processedTime;
+			unprocessedTime += delta;
+			frameCounter += delta;
 		}
 	}
 
@@ -316,7 +313,6 @@ public class Engine implements Disposable {
 
 	@Override
 	public void onDispose() {
-		Adventure.log.info("Disposing");
 		currentScene.onDispose();
 		adventureScript.onDispose();
 		guiLayer.onDispose();

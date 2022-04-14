@@ -2,6 +2,8 @@ package captainsly.adventure.core.entity.components.internal;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
+import org.joml.Vector2f;
+
 import captainsly.adventure.Adventure;
 import captainsly.adventure.core.entity.GameObject;
 import captainsly.adventure.core.entity.components.Component;
@@ -15,11 +17,9 @@ import captainsly.adventure.utils.Settings;
 */
 public class MouseControlComponent extends Component {
 
-	GameObject holdingObject = null;
-
-	@Override
-	public void start() {
-	}
+	// TODO: Implement Brushes to draw map components. 
+	
+	private GameObject holdingObject = null;
 
 	public void pickupObject(GameObject gObj) {
 		holdingObject = gObj;
@@ -33,13 +33,12 @@ public class MouseControlComponent extends Component {
 	@Override
 	public void update(double delta) {
 		if (holdingObject != null) {
-			holdingObject.getObjectTransform().position.set(MouseListener.getMouseOrthoPosition());
+			holdingObject.getObjectPosition().set(new Vector2f(MouseListener.getOrthoX(), MouseListener.getOrthoY()));
 
-			holdingObject.getObjectTransform().position.x = (int) (holdingObject.getObjectTransform().position.x / Settings.GRID_SIZE) * Settings.GRID_SIZE;
-			holdingObject.getObjectTransform().position.y = (int) (holdingObject.getObjectTransform().position.y / Settings.GRID_SIZE) * Settings.GRID_SIZE;
+			holdingObject.getObjectPosition().x = (int) (holdingObject.getObjectPosition().x / Settings.GRID_SIZE) * Settings.GRID_SIZE;
+			holdingObject.getObjectPosition().y = (int) (holdingObject.getObjectPosition().y / Settings.GRID_SIZE) * Settings.GRID_SIZE;
 			
-			if (MouseListener.isButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-				Adventure.log.debug("Placing held object");
+			if (MouseListener.mouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
 				placeObject();
 			}
 		}

@@ -1,0 +1,176 @@
+[
+  {
+    "uID": 3,
+    "objectId": "Generated Sprite Object",
+    "transform": {
+      "position": {
+        "x": 224.0,
+        "y": 416.0
+      },
+      "scale": {
+        "x": 32.0,
+        "y": 32.0
+      },
+      "rotation": 0.0
+    },
+    "zIndex": 0,
+    "components": [
+      {
+        "componentType": "captainsly.adventure.core.entity.components.SpriteRenderer",
+        "componentProperties": {
+          "sprite": {
+            "spriteTexture": {
+              "filePath": "assets/textures/terrain.png",
+              "width": 624,
+              "height": 608
+            },
+            "spriteColor": {
+              "x": 1.0,
+              "y": 1.0,
+              "z": 1.0,
+              "w": 1.0
+            },
+            "uvCoords": [
+              {
+                "x": 0.41025642,
+                "y": 0.94736844
+              },
+              {
+                "x": 0.41025642,
+                "y": 0.92105263
+              },
+              {
+                "x": 0.3846154,
+                "y": 0.92105263
+              },
+              {
+                "x": 0.3846154,
+                "y": 0.94736844
+              }
+            ],
+            "spriteWidth": 16.0,
+            "spriteHeight": 16.0
+          },
+          "uID": 6
+        }
+      }
+    ],
+    "doSerialization": true
+  },
+  {
+    "uID": 4,
+    "objectId": "Generated Sprite Object",
+    "transform": {
+      "position": {
+        "x": 192.0,
+        "y": 480.0
+      },
+      "scale": {
+        "x": 32.0,
+        "y": 32.0
+      },
+      "rotation": 0.0
+    },
+    "zIndex": 0,
+    "components": [
+      {
+        "componentType": "captainsly.adventure.core.entity.components.SpriteRenderer",
+        "componentProperties": {
+          "sprite": {
+            "spriteTexture": {
+              "filePath": "assets/textures/terrain.png",
+              "width": 624,
+              "height": 608
+            },
+            "spriteColor": {
+              "x": 1.0,
+              "y": 1.0,
+              "z": 1.0,
+              "w": 1.0
+            },
+            "uvCoords": [
+              {
+                "x": 0.30769232,
+                "y": 0.94736844
+              },
+              {
+                "x": 0.30769232,
+                "y": 0.92105263
+              },
+              {
+                "x": 0.2820513,
+                "y": 0.92105263
+              },
+              {
+                "x": 0.2820513,
+                "y": 0.94736844
+              }
+            ],
+            "spriteWidth": 16.0,
+            "spriteHeight": 16.0
+          },
+          "uID": 7
+        }
+      }
+    ],
+    "doSerialization": true
+  },
+  {
+    "uID": 5,
+    "objectId": "Generated Sprite Object",
+    "transform": {
+      "position": {
+        "x": 96.0,
+        "y": 416.0
+      },
+      "scale": {
+        "x": 32.0,
+        "y": 32.0
+      },
+      "rotation": 0.0
+    },
+    "zIndex": 0,
+    "components": [
+      {
+        "componentType": "captainsly.adventure.core.entity.components.SpriteRenderer",
+        "componentProperties": {
+          "sprite": {
+            "spriteTexture": {
+              "filePath": "assets/textures/terrain.png",
+              "width": 624,
+              "height": 608
+            },
+            "spriteColor": {
+              "x": 1.0,
+              "y": 1.0,
+              "z": 1.0,
+              "w": 1.0
+            },
+            "uvCoords": [
+              {
+                "x": 0.30769232,
+                "y": 0.94736844
+              },
+              {
+                "x": 0.30769232,
+                "y": 0.92105263
+              },
+              {
+                "x": 0.2820513,
+                "y": 0.92105263
+              },
+              {
+                "x": 0.2820513,
+                "y": 0.94736844
+              }
+            ],
+            "spriteWidth": 16.0,
+            "spriteHeight": 16.0
+          },
+          "uID": 8
+        }
+      }
+    ],
+    "doSerialization": true
+  }
+]

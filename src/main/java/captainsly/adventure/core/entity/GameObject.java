@@ -16,6 +16,7 @@ public class GameObject {
 	private Transform transform = new Transform();
 	private int zIndex = 0;
 	private List<Component> components = new ArrayList<>();
+    private boolean doSerialization = true;
 
 	public GameObject() {
 		this.uID = ID_COUNTER++;
@@ -35,7 +36,7 @@ public class GameObject {
 		this.transform = transform;
 		components = new ArrayList<>();
 		this.zIndex = zIndex;
-		
+
 		this.uID = ID_COUNTER++;
 	}
 
@@ -123,14 +124,38 @@ public class GameObject {
 		this.transform = transform;
 	}
 
+	public void setObjectRotation(int rotation) {
+		transform.rotation = rotation;
+	}
+	
 	public void setzIndex(int zIndex) {
 		this.zIndex = zIndex;
+	}
+
+	public void setNoSerialize() {
+		this.doSerialization = false;
+	}
+
+	public boolean doSerialization() {
+		return this.doSerialization;
 	}
 
 	public List<Component> getComponents() {
 		return components;
 	}
 
+	public Vector2f getObjectPosition() {
+		return transform.position;
+	}
+	
+	public Vector2f getObjectScale() {
+		return transform.scale;
+	}
+	
+	public float getObjectRotation() {
+		return transform.rotation;
+	}
+	
 	public Transform getObjectTransform() {
 		return transform;
 	}
@@ -146,5 +171,7 @@ public class GameObject {
 	public int getZIndex() {
 		return zIndex;
 	}
+
+
 
 }
